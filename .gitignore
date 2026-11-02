@@ -1,6 +1,41 @@
 node_modules/
-.env
-.env.*
+dist/
 *.log
 .DS_Store
+
+# Segredos: nenhum .env é commitado (exceto os exemplos)
+.env
+.env.*
+!.env.example
+
+# Origem do Lovable: só referência local, não vai para o repo
+lovable/
 .claude/settings.local.json
+
+# BEGIN AI-DLC:gitignore
+# AI-DLC: local working files
+aidlc/active-space
+aidlc/spaces/*/intents/active-intent
+aidlc/.aidlc-clone-id
+aidlc.settings.local.json
+aidlc/.aidlc-unit-scope.json
+aidlc/.aidlc-unit-parked
+aidlc/.aidlc-claim-generations.json
+aidlc/.aidlc-unit-participant
+aidlc/.aidlc-claim-registry.json
+aidlc/.aidlc-unit-releases/
+aidlc/.aidlc-unit-merges/
+aidlc/.aidlc-active-space-*.tmp
+aidlc/active-memory/
+aidlc/.aidlc-sessions/
+aidlc/.aidlc-request-text/
+aidlc/spaces/*/intents/.aidlc-*
+**/aidlc/spaces/*/intents/**/.aidlc-engine/
+**/aidlc/spaces/*/intents/**/.aidlc-sensors/
+aidlc/spaces/*/knowledge/documentkb/.journal/
+aidlc/spaces/*/knowledge/.sources.local.json
+aidlc/spaces/*/intents/*/runtime-graph.json
+aidlc/spaces/*/intents/*/.aidlc-*
+aidlc/diagnostics/
+.claude/settings.local.json
+# END AI-DLC:gitignore

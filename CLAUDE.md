@@ -1,34 +1,22 @@
-# AI-DLC — Regras do projeto
+# TroKa — regras do projeto
 
-Este projeto segue o AI-Driven Development Life Cycle (AI-DLC): a IA conduz o
-planejamento e a execução, os humanos validam cada etapa ("mob elaboration" e
-"mob construction"). Nada avança de fase sem aprovação explícita.
+## Estrutura
+- `apps/web` front (Vite SPA, Vercel) · `supabase/migrations` banco · `supabase/functions` Edge Functions · `docs/aidlc` regras, requisitos, unidades, decisões, `audit.md`, `state.md`.
+- Fonte da verdade: `docs/aidlc/regras-de-negocio.md`. **Cite regras por ID** (RN01, RN14...).
 
-## Fases
+## Regras
+- **Plano antes de código**: proponha plano com checkboxes, espere aprovação, depois execute. Um bolt por vez; registre decisões em `docs/aidlc/audit.md`.
+- **Regra de negócio no banco** (funções RPC + RLS + constraints), nunca só no front. O front só exibe e chama RPC.
+- **Banco só via migration** em `supabase/migrations`, aplicada local com `npx supabase db reset`. Nunca alterar schema pelo Studio/painel.
+- **Primeiro local, depois nuvem**. Nunca rodar `supabase link`, `db push` ou `functions deploy` sem pedido explícito.
+- **Nunca service_role no front** nem no chat; front usa só `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. Nenhum `.env*` commitado.
+- Antes de comando Supabase, explique em 1–2 linhas o que faz.
+- Ao fim de cada etapa, diga como conferir no Studio local (http://localhost:54323).
+- `lovable/` é só origem de referência: não alterar.
+- Validação CRM/COREN (RN01b) deve ter modo de teste sem validação, controlado por secret da Edge Function (nunca flag no front).
 
-1. **Inception** (`aidlc-docs/inception/`) — transformar uma *Intent* em
-   requisitos, user stories e *Units* de trabalho.
-2. **Construction** (`aidlc-docs/construction/`) — para cada Unit: design de
-   domínio, design lógico, código e testes.
-3. **Operations** (`aidlc-docs/operations/`) — deploy, observabilidade,
-   incidentes e aprendizados.
-
-## Regras de trabalho
-
-- Antes de qualquer fase, leia `aidlc-docs/audit.md` e o estado em
-  `aidlc-docs/state.md`.
-- Para cada fase: gere um plano em markdown com checkboxes, peça aprovação,
-  só então execute marcando os itens.
-- Faça perguntas de esclarecimento em arquivo (`*-questions.md`) com opções
-  A/B/C e um campo `[Resposta]:`; não assuma respostas.
-- Registre toda interação relevante em `aidlc-docs/audit.md` (timestamp ISO,
-  entrada do usuário, decisão, aprovação).
-- Código de aplicação vai na raiz do projeto (`src/`, `tests/`), nunca dentro
-  de `aidlc-docs/`.
-- Uma Unit por vez; cada Unit deve ser entregável e testável de forma
-  independente.
-
-## Fluxo de início
-
-Ao receber uma nova intent: crie `aidlc-docs/inception/intent.md` a partir do
-template em `aidlc-docs/templates/intent.md` e comece pela etapa de requisitos.
+## Economia de tokens
+- Não ler `node_modules`, `dist`, `.git`, lockfiles, assets.
+- Ler por amostragem: estrutura primeiro, conteúdo só do necessário.
+- Respostas curtas, tabelas/listas; mostrar só trechos alterados.
+- npm: usar `npx -y npm@11` (npm 10.9 quebra com `edgesOut`).
