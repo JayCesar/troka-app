@@ -8,6 +8,7 @@ import { AnunciosSetor } from "@/components/gestao/AnunciosSetor";
 import { Pendencias } from "@/components/gestao/Pendencias";
 import { Alertas } from "@/components/gestao/Alertas";
 import { Equipe } from "@/components/gestao/Equipe";
+import { Historico } from "@/components/gestao/Historico";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
 export const Route = createFileRoute("/gestao")({
@@ -30,14 +31,15 @@ function Page() {
       <AnunciosSetor />
       <PlantoesSetor />
       <Equipe />
-      <MockOnly bolt="B8–B10">
+      <Historico />
+      <MockOnly bolt="B9–B10">
         <MockGestao />
       </MockOnly>
     </div>
   );
 }
 
-// TEMPORÁRIO: painel, histórico e cadastro mock até B8–B10.
+// TEMPORÁRIO: painel e cadastro mock até B9–B10.
 function MockGestao() {
   const { user, state, hospital, name, decide } = useTroka();
   const [form, setForm] = useState(false);
@@ -47,12 +49,6 @@ function MockGestao() {
   const pending = state.coverages.filter((c) => c.status === "pendente" && hs.some((s) => s.id === c.shiftId));
   const alerts = open.filter((s) => eligibleDoctors(state, s).length === 0);
 
-  const exportCsv = () => {
-    const rows = [["Data/hora", "Quem", "Ação", "Detalhe"], ...state.audit.map((a) => [new Date(a.at).toISOString(), a.actorId === "sistema" ? "Sistema" : name(a.actorId), a.action, a.detail])];
-    const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
-    const a = document.createElement("a"); a.href = url; a.download = "troka-historico.csv"; a.click(); URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="space-y-6">
@@ -71,21 +67,6 @@ function MockGestao() {
 
       <button className="btn btn-outline w-full" onClick={() => setForm(true)}><UserPlus className="h-4 w-4" />Cadastrar profissional</button>
 
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Histórico auditável</h2>
-          <button className="btn btn-outline min-h-10 text-sm" onClick={exportCsv}><Download className="h-4 w-4" />CSV</button>
-        </div>
-        <ol className="card divide-y">
-          {state.audit.map((a) => (
-            <li key={a.id} className="p-4 text-sm">
-              <div className="flex justify-between gap-2"><span className="font-bold">{a.action}</span><span className="shrink-0 text-xs text-muted-foreground">{fmtDateTime(a.at)}</span></div>
-              <p className="text-muted-foreground">{a.detail}</p>
-              <p className="text-xs">por {a.actorId === "sistema" ? "Sistema" : name(a.actorId)}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
       {form && <ProfessionalForm onClose={() => setForm(false)} />}
     </div>
   );

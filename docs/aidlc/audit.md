@@ -76,3 +76,8 @@
 - Execução: migration `20261102194246_b7_expiracao.sql` (`alerta` + trigger de expiração, auto-resolução ao trocar dono, `cancelar_anuncio`, `resolver_alerta`, `app.expirar_vencidos` + job pg_cron por minuto), `b7_expiracao.test.sql` 19/19 (total 142/142). Front: "Cancelar anúncio" em /plantoes, "Plantões em risco" na gestão.
 - Aprovação: automode.
 - Validação real do pg_cron (2026-11-02T19:46:00Z): anúncio do Pedro vencido → job expirou, alerta criado, avisos à gestão e ao anunciante, sem chamada manual.
+
+## 2026-11-03T00:15:00Z — B8 (Histórico imutável e CSV) — automode
+- Decisões automode (revisáveis) P1–P5 em `docs/aidlc/construction/b8-historico/plano.md`.
+- Execução: migration `20261102194614_b8_historico.sql` (`historico`, trigger genérico em 7 tabelas, imutabilidade por trigger, `historico_do_setor`), `b8_historico.test.sql` 16/16 (total 158/158). Front: histórico real + CSV completo na gestão (mock removido).
+- Aprovação: automode.

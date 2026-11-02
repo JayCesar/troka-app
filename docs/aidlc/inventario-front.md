@@ -28,7 +28,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 | Anúncios | **banco (B3)** em `/plantoes`, `/anunciar`, `/gestao`; `/assumir` ainda mock | `anuncio` + `anuncio_motivo` |
 | Elegibilidade | **banco (B4)**: `app.motivos_para` + `ofertas_para_mim` | — |
 | Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
-| Histórico | mock (`audit`), mutável | `historico` append-only via trigger (B8) |
+| Histórico | **banco (B8)**: `historico` imutável + CSV | — |
 | Notificações | **banco (B4)**: `aviso` + sino no AppShell | — |
 | Login | **Supabase Auth (B1, feito)** — e-mail + senha | — |
 | Logo | `/favicon.png` provisório | asset final em `public/` |
@@ -75,13 +75,13 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN22b | Quem assumiu desiste antes da aprovação | **coberta** (B4) | RPC `desistir_anuncio` (+ `desistir_candidatura`). |
 | RN23 | Anúncio expira sem interessado | **coberta** (B7) | job pg_cron `troka-expirar-vencidos` a cada minuto + expiração preguiçosa. |
 | RN24 | Expirado gera alerta de plantão em risco | **coberta** (B7) | trigger cria `alerta` em toda expiração; seção "Plantões em risco" na gestão. |
-| RN25 | Toda mudança registrada | parcial | `log()` em parte das ações, no front |
-| RN26 | Histórico imutável | falta | Array em memória |
-| RN27 | Exportar CSV | parcial | Botão em `/gestao` gera CSV do mock (reaproveitável) |
+| RN25 | Toda mudança registrada | **coberta** (B8) | triggers em 7 tabelas gravam `historico` (inclui ações do pg_cron como "Sistema"). |
+| RN26 | Histórico imutável | **coberta** (B8) | sem escrita via API + trigger bloqueia UPDATE/DELETE/TRUNCATE para qualquer papel. |
+| RN27 | Exportar CSV | **coberta** (B8) | `historico_do_setor` + CSV (`;` + BOM) na gestão. |
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 36 · parcial 3 · falta 2 (após B7).
+**Totais (41 RNs):** coberta 39 · parcial 1 · falta 1 (após B8).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

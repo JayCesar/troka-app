@@ -259,6 +259,52 @@ export type Database = {
         };
         Relationships: [];
       };
+      historico: {
+        Row: {
+          acao: string;
+          antes: Json | null;
+          ator_id: string | null;
+          depois: Json | null;
+          entidade: string;
+          entidade_id: string | null;
+          hospital_id: string;
+          id: number;
+          ocorrido_em: string;
+          plantao_id: string | null;
+          resumo: string;
+          setor_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          acao: string;
+          antes?: Json | null;
+          ator_id?: string | null;
+          depois?: Json | null;
+          entidade: string;
+          entidade_id?: string | null;
+          hospital_id: string;
+          id?: never;
+          ocorrido_em?: string;
+          plantao_id?: string | null;
+          resumo: string;
+          setor_id: string;
+        };
+        Update: {
+          acao?: string;
+          antes?: Json | null;
+          ator_id?: string | null;
+          depois?: Json | null;
+          entidade?: string;
+          entidade_id?: string | null;
+          hospital_id?: string;
+          id?: never;
+          ocorrido_em?: string;
+          plantao_id?: string | null;
+          resumo?: string;
+          setor_id?: string;
+        };
+        Relationships: [];
+      };
       hospital: {
         Row: {
           criado_em: string;
@@ -765,6 +811,16 @@ export type Database = {
           especialidade: string;
           id: string;
           nome: string;
+        }[];
+      };
+      historico_do_setor: {
+        Args: { p_limite?: number };
+        Returns: {
+          ator: string;
+          entidade: string;
+          ocorrido_em: string;
+          plantao: string;
+          resumo: string;
         }[];
       };
       marcar_avisos_lidos: { Args: Record<PropertyKey, never>; Returns: undefined };

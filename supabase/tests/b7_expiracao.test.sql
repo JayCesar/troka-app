@@ -36,7 +36,8 @@ begin
   end loop;
 end $$;
 create function pg_temp.p(n text) returns uuid language sql as $$ select id from t where nome = n $$;
-create function pg_temp.an(n text) returns uuid language sql as $$ select id from public.anuncio where plantao_id = pg_temp.p(n) order by criado_em desc, id limit 1 $$;
+-- now() é constante na transação: o ativo vem primeiro para desempatar com o cancelado
+create function pg_temp.an(n text) returns uuid language sql as $$ select id from public.anuncio where plantao_id = pg_temp.p(n) order by status in ('aberto', 'pendente') desc, criado_em desc limit 1 $$;
 create function pg_temp.st(n text) returns text language sql as $$ select status::text from public.anuncio where id = pg_temp.an(n) $$;
 
 set local role authenticated;
