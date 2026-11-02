@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { AppShell, MockOnly } from "@/components/AppShell";
 import { PlantoesSetor } from "@/components/gestao/PlantoesSetor";
 import { AnunciosSetor } from "@/components/gestao/AnunciosSetor";
+import { Pendencias } from "@/components/gestao/Pendencias";
+import { Equipe } from "@/components/gestao/Equipe";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
 export const Route = createFileRoute("/gestao")({
@@ -22,16 +24,18 @@ export const Route = createFileRoute("/gestao")({
 function Page() {
   return (
     <div className="space-y-8">
+      <Pendencias />
       <AnunciosSetor />
       <PlantoesSetor />
-      <MockOnly bolt="B5–B9">
+      <Equipe />
+      <MockOnly bolt="B8–B10">
         <MockGestao />
       </MockOnly>
     </div>
   );
 }
 
-// TEMPORÁRIO: painel/aprovações/histórico mock até B5–B9.
+// TEMPORÁRIO: painel, histórico e cadastro mock até B8–B10.
 function MockGestao() {
   const { user, state, hospital, name, decide } = useTroka();
   const [form, setForm] = useState(false);
@@ -62,26 +66,6 @@ function MockGestao() {
         </div>
       )}
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold">Aguardando aprovação</h2>
-        {pending.length === 0 && <p className="card p-5 text-center text-sm text-muted-foreground">Nenhuma troca pendente.</p>}
-        {pending.map((c) => {
-          const s = state.shifts.find((x) => x.id === c.shiftId)!;
-          return (
-            <div key={c.id} className="card space-y-3 p-4">
-              <div>
-                <p className="font-bold">{s.sector} · {fmtDay(s.start)} {fmtTime(s.start)}–{fmtTime(s.end)}</p>
-                <p className="text-sm text-muted-foreground">{name(c.requesterId)} → <span className="font-semibold text-foreground">{name(c.acceptedBy)}</span></p>
-                <p className="text-xs text-muted-foreground">Motivo: {c.reason} · {c.urgency}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button className="btn btn-danger" onClick={() => { decide(c.id, false); toast("Troca recusada."); }}>Recusar</button>
-                <button className="btn btn-primary" onClick={() => { decide(c.id, true); toast.success("Troca aprovada."); }}>Aprovar</button>
-              </div>
-            </div>
-          );
-        })}
-      </section>
 
       <button className="btn btn-outline w-full" onClick={() => setForm(true)}><UserPlus className="h-4 w-4" />Cadastrar profissional</button>
 

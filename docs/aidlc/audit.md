@@ -60,3 +60,8 @@
 - Decisões automode (revisáveis) P1–P6 em `docs/aidlc/construction/b4-elegibilidade/plano.md`.
 - Execução: migration `20261102192424_b4_elegibilidade.sql` (assumidor no anúncio, `candidatura`, `aviso`, RN14 com pendências, RPCs assumir/desistir/candidatar/ofertas/solicitações, RN11 no `anunciar`), seed com troca pendente + candidatura, `b4_elegibilidade.test.sql` 26/26 (total 84/84). Front: `/assumir` real, sino de avisos real.
 - Aprovação: automode (commit após testes + build + API verdes).
+
+## 2026-11-02T23:20:00Z — B5 (Aprovação e lista de confiança) — automode
+- Decisões automode (revisáveis) P1–P5 em `docs/aidlc/construction/b5-aprovacao/plano.md`.
+- Execução: migration `20261102193201_b5_aprovacao.sql` (`lista_confianca`, efetivação com revalidação RN16, auto-aprovação RN19c/RN06c, RPCs aprovar/recusar troca e candidatura, pendências e equipe), seed com lista de confiança, `b5_aprovacao.test.sql` 27/27 (total 111/111). Front: "Aguardando aprovação" real e "Equipe do setor" com lista de confiança.
+- Aprovação: automode (commit após testes + build + API verdes).

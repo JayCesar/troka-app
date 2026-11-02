@@ -38,7 +38,7 @@ export function useMinhasSolicitacoes() {
 }
 
 // Toda ação muda ofertas, solicitações, plantões, anúncios e avisos
-function useAcao<A>(fn: (a: A) => Promise<unknown>) {
+function useAcao<A, R>(fn: (a: A) => Promise<R>) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: fn,

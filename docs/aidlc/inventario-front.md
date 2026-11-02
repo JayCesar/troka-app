@@ -48,7 +48,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN05 | Só gestor do setor cria/edita/remove plantão | **coberta** (B2) | RPCs `criar/editar/remover_plantao` (setor do perfil, só antes do início); CRUD em `/gestao`. Antes: Não há tela nem ação de CRUD de plantão |
 | RN06 | Plantão aberto ou atribuído | **coberta** (B2) | coluna gerada `status`. Antes: Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
 | RN06b | Troca só via anúncio | **coberta** (B3) | não existe RPC de troca direta; `anunciar` é o único caminho. Antes: Anúncio existe |
-| RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | parcial (B4) | candidatura + desistência no banco; aprovação/auto-aprovação no B5. |
+| RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | **coberta** (B5) | candidatura + aprovação manual/automática (lista de confiança). |
 | RN07 | Só o dono anuncia, antes do início | **coberta** (B3) | RPC `anunciar`. Antes: Lista só plantões do usuário; não checa início |
 | RN08 | Máx. 1 anúncio aberto por plantão | **coberta** (B3) | índice único parcial (aberto+pendente). Antes: Implícito (plantão anunciado sai da lista); sem garantia |
 | RN09 | Urgência obrigatória, motivo opcional | **coberta** (B3) | Antes: Motivo obrigatório; 3 urgências |
@@ -61,13 +61,13 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN13 | Especialidade idêntica | **coberta** (B4) | `app.motivos_para`. |
 | RN14 | Sem sobreposição + 11h de descanso, incluindo trocas | **coberta** (B4) | inclui compromissos pendentes (P2). |
 | RN15 | Ninguém assume o próprio plantão | **coberta** (B4) | `app.motivos_para`. |
-| RN16 | Revalidar elegibilidade na aprovação | falta | `decide` não revalida |
-| RN19 | Coordenação aprova/recusa com um clique | parcial | `decide` em `/gestao` |
-| RN19b | Lista de confiança por setor | falta | — |
-| RN19c | Auto-aprovação se ambos na lista + elegível; sem retroagir | falta | Hoje `autoApprove` por hospital |
-| RN20 | Dono muda só após aprovação | parcial | `decide`/auto em `acceptCoverage`; `takeShift` atribui direto |
-| RN20b | Sem cancelamento após aprovação | falta | Não há cancelamento algum (ok por omissão, mas sem bloqueio) |
-| RN21 | Só gestor do setor aprova | parcial | Guarda por papel na rota; não checa setor |
+| RN16 | Revalidar elegibilidade na aprovação | **coberta** (B5) | `app.efetivar_*` revalida RN12–RN15; gestão vê a revalidação prévia. |
+| RN19 | Coordenação aprova/recusa com um clique | **coberta** (B5) | `aprovar_troca`/`recusar_troca` com um clique. |
+| RN19b | Lista de confiança por setor | **coberta** (B5) | `lista_confianca` + `definir_confianca`; seção Equipe. |
+| RN19c | Auto-aprovação se ambos na lista + elegível; sem retroagir | **coberta** (B5) | avaliada no ato da solicitação; não retroage (testado). |
+| RN20 | Dono muda só após aprovação | **coberta** (B5) | dono só muda em `efetivar_troca`/`efetivar_candidatura`. |
+| RN20b | Sem cancelamento após aprovação | **coberta** (B5) | não há RPC de desfazer; desistir/recusar exigem pendente (testado). |
+| RN21 | Só gestor do setor aprova | **coberta** (B5) | `app.anuncio_do_meu_setor`/`candidatura_do_meu_setor`. |
 | RN17 | Só gestor oferece adicional | falta | Bônus vem de regra do hospital, automático |
 | RN17b | Valor fixo por anúncio, opcional | falta | Bônus por urgência |
 | RN18 | Adicional visível antes de assumir e no histórico | parcial | Exibido em `/assumir` e `/anunciar`; não vai para histórico |
@@ -81,7 +81,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 22 · parcial 9 · falta 10 (após B4).
+**Totais (41 RNs):** coberta 30 · parcial 5 · falta 6 (após B5).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

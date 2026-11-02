@@ -63,8 +63,17 @@ function OfertaCard({ o }: { o: Oferta }) {
   const anuncio = o.tipo === "anuncio";
 
   const agir = () => {
-    if (anuncio) assumir.mutate(o.anuncio_id!, { onSuccess: () => toast.success("Anúncio assumido. Aguardando aprovação da gestão."), onError: erro });
-    else candidatar.mutate(o.plantao_id, { onSuccess: () => toast.success("Candidatura enviada à gestão."), onError: erro });
+    // RN19c / RN06c: o banco pode aprovar na hora (lista de confiança)
+    if (anuncio)
+      assumir.mutate(o.anuncio_id!, {
+        onSuccess: (a) => toast.success(a.status === "aprovado" ? "Troca aprovada automaticamente! O plantão é seu." : "Anúncio assumido. Aguardando aprovação da gestão."),
+        onError: erro,
+      });
+    else
+      candidatar.mutate(o.plantao_id, {
+        onSuccess: (c) => toast.success(c.status === "aprovada" ? "Aprovado automaticamente! O plantão é seu." : "Candidatura enviada à gestão."),
+        onError: erro,
+      });
   };
 
   return (

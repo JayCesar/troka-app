@@ -69,8 +69,9 @@ export function useAnunciosSetor() {
           .select(
             "id, status, urgencia, expira_em, criado_em, anuncio_motivo(categoria, texto), anunciante:perfil!anuncio_anunciante_id_fkey(nome), assumido:perfil!anuncio_assumido_por_fkey(nome), plantao(inicio, fim, especialidade(nome))",
           )
-          // "em aberto" efetivo (B3/P1): pendente, ou aberto ainda no prazo
-          .or(`status.eq.pendente,and(status.eq.aberto,expira_em.gt.${new Date().toISOString()})`)
+          // abertos no prazo (os pendentes aparecem em "Aguardando aprovação")
+          .eq("status", "aberto")
+          .gt("expira_em", new Date().toISOString())
           .order("expira_em"),
       ) as unknown as AnuncioSetor[],
   });

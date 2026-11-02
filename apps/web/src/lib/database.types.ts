@@ -209,6 +209,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      lista_confianca: {
+        Row: {
+          incluido_em: string;
+          incluido_por: string;
+          profissional_id: string;
+          setor_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          incluido_em?: string;
+          incluido_por: string;
+          profissional_id: string;
+          setor_id: string;
+        };
+        Update: {
+          incluido_em?: string;
+          incluido_por?: string;
+          profissional_id?: string;
+          setor_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lista_confianca_incluido_por_fkey";
+            columns: ["incluido_por"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lista_confianca_profissional_id_fkey";
+            columns: ["profissional_id"];
+            isOneToOne: true;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lista_confianca_setor_id_fkey";
+            columns: ["setor_id"];
+            isOneToOne: false;
+            referencedRelation: "setor";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       perfil: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_profissional"] | null;
@@ -411,6 +455,44 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      aprovar_candidatura: {
+        Args: { p_candidatura_id: string };
+        Returns: {
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          profissional_id: string;
+          status: Database["public"]["Enums"]["status_candidatura"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "candidatura";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      aprovar_troca: {
+        Args: { p_anuncio_id: string };
+        Returns: {
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       assumir_anuncio: {
         Args: { p_anuncio_id: string };
         Returns: {
@@ -475,6 +557,10 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      definir_confianca: {
+        Args: { p_confiavel: boolean; p_profissional_id: string };
+        Returns: undefined;
       };
       desistir_anuncio: {
         Args: { p_anuncio_id: string };
@@ -542,6 +628,16 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      equipe_do_setor: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          categoria: Database["public"]["Enums"]["categoria_profissional"];
+          confiavel: boolean;
+          especialidade: string;
+          id: string;
+          nome: string;
+        }[];
+      };
       marcar_avisos_lidos: { Args: Record<PropertyKey, never>; Returns: undefined };
       minhas_solicitacoes: {
         Args: Record<PropertyKey, never>;
@@ -570,6 +666,60 @@ export type Database = {
           tipo: string;
           urgencia: Database["public"]["Enums"]["urgencia"];
         }[];
+      };
+      pendencias_do_setor: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          anunciante: string;
+          especialidade: string;
+          fim: string;
+          id: string;
+          inicio: string;
+          motivos: string[];
+          plantao_id: string;
+          solicitado_em: string;
+          solicitante: string;
+          tipo: string;
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        }[];
+      };
+      recusar_candidatura: {
+        Args: { p_candidatura_id: string };
+        Returns: {
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          profissional_id: string;
+          status: Database["public"]["Enums"]["status_candidatura"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "candidatura";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      recusar_troca: {
+        Args: { p_anuncio_id: string };
+        Returns: {
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       remover_plantao: { Args: { p_id: string }; Returns: undefined };
     };

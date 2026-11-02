@@ -134,3 +134,12 @@ select public.candidatar((select id from public.plantao
                           where setor_id = '20000000-0000-0000-0000-000000000013' and profissional_id is null
                           order by inicio desc limit 1));
 select set_config('request.jwt.claims', '', true);
+
+-- ---------------------------------------------------------------------------
+-- B5: lista de confiança (incluída DEPOIS das pendências do seed — elas seguem manuais, RN19c não retroage)
+-- Clínica Médica VN: Carlos e Juliana confiáveis (troca entre eles = automática). PS VN: só Marina.
+-- ---------------------------------------------------------------------------
+insert into public.lista_confianca (profissional_id, setor_id, incluido_por)
+select p.id, p.setor_id, (select g.id from public.perfil g where g.setor_id = p.setor_id and g.papel = 'gestor' limit 1)
+from public.perfil p
+where p.id in ('40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000004', '40000000-0000-0000-0000-000000000006');
