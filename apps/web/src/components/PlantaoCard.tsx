@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { fmtDay, fmtTime } from "@/lib/troka";
-import type { Plantao } from "@/lib/api/plantoes";
+import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { anuncioAtivo, type Plantao } from "@/lib/api/plantoes";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   aberto: { label: "Aberto", cls: "bg-secondary text-secondary-foreground" },
@@ -12,6 +12,7 @@ export function PlantaoCard({ plantao, showProfissional, children }: { plantao: 
   const inicio = new Date(plantao.inicio).getTime();
   const fim = new Date(plantao.fim).getTime();
   const status = STATUS[plantao.status ?? "aberto"] ?? STATUS["aberto"]!;
+  const anuncio = anuncioAtivo(plantao);
   return (
     <div className="card p-4">
       <div className="flex items-start gap-4">
@@ -23,6 +24,8 @@ export function PlantaoCard({ plantao, showProfissional, children }: { plantao: 
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-bold">{plantao.especialidade?.nome}</h3>
             <span className={`chip ${status.cls}`}>{status.label}</span>
+            {anuncio && <span className="chip bg-warning/15 text-warning">{anuncio.status === "pendente" ? "Troca pendente" : `Anunciado · vence ${fmtDateTime(new Date(anuncio.expira_em).getTime())}`}</span>}
+            {anuncio?.urgencia === "urgente" && <span className="chip bg-destructive/15 text-destructive">Urgente</span>}
           </div>
           <p className="text-sm text-muted-foreground">{plantao.setor?.nome} · {plantao.hospital?.nome}</p>
           <p className="text-sm font-semibold">{fmtTime(inicio)} – {fmtTime(fim)}{fmtDay(fim) !== fmtDay(inicio) && ` (${fmtDay(fim)})`}</p>

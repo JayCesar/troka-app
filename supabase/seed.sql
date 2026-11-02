@@ -100,3 +100,21 @@ select pg_temp.plantao('20000000-0000-0000-0000-000000000021', 'Intensivista', 3
 select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Clínico', 1, 7, 12, '40000000-0000-0000-0000-000000000007');  -- Tiago
 select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Enfermagem Clínica', 2, 7, 12, '50000000-0000-0000-0000-000000000003'); -- Camila
 select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Clínico', 4, 7, 12); -- aberto
+
+-- ---------------------------------------------------------------------------
+-- Anúncios (B3): criados pela RPC `anunciar`, "logado" como o dono do plantão.
+-- ---------------------------------------------------------------------------
+create function pg_temp.anunciar_como(p_dono uuid, p_ordem int, p_urgencia public.urgencia,
+                                       p_cat public.motivo_categoria default null, p_texto text default null)
+returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('sub', p_dono, 'role', 'authenticated')::text, true);
+  perform public.anunciar(
+    (select id from public.plantao where profissional_id = p_dono order by inicio offset p_ordem limit 1),
+    p_urgencia, p_cat, p_texto);
+  perform set_config('request.jwt.claims', '', true);
+end $$;
+
+select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000004', 1, 'normal', 'pessoal', 'Casamento da minha irmã'); -- Juliana (noturno, dia 5)
+select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000003', 0, 'urgente', 'saude', 'Cirurgia marcada');        -- Rafael (PS, amanhã)
+select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000005', 0, 'normal');                                       -- Pedro (SC UTI), sem motivo

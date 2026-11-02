@@ -43,3 +43,15 @@
 - Execução B2 (2026-11-02T20:40:00Z): migration `20261102185142_b2_plantoes.sql` (tabela `plantao`, `app.motivos_inelegibilidade`, trigger de atribuição, RLS, RPCs `criar/editar/remover_plantao`), seed com 20 plantões, `b2_plantoes.test.sql` 20/20 (total 36/36). Front: `/plantoes` real, seção "Plantões do setor" em `/gestao`, `MockOnly` nas telas ainda mock.
 - Ajuste pós-feedback: formulário de plantão com data + turno (Diurno/Noturno/Personalizado), resumo, especialidades do setor primeiro.
 - Aprovação: aprovado pelo usuário (teste manual ok) em 2026-11-02T21:00:00Z.
+
+## 2026-11-02T21:05:00Z — B3 (Anúncio) — plano
+- B2 commitado (`a7691da`). Plano: `docs/aidlc/construction/b3-anuncio/plano.md`; perguntas em `perguntas.md`.
+- Respostas: A em tudo (P1 aberto+pendente; P2 500 chars; P3 sem edição; P4 gestor+anunciante; P5 sem antecedência mínima).
+- Aprovação: aprovado; execução iniciada.
+- Execução B3 (2026-11-02T21:50:00Z): migration `20261102191506_b3_anuncio.sql` (enums, `anuncio`, `anuncio_motivo`, índice RN08, RLS RN29, RPC `anunciar`, bloqueio de edição/remoção de plantão anunciado), seed com 3 anúncios, `b3_anuncio.test.sql` 22/22 (total 58/58). Front: `/anunciar` real, "Pedir cobertura" em `/plantoes`, seção "Anúncios do setor" em `/gestao`.
+- Aprovação: aprovado pelo usuário em 2026-11-02T22:00:00Z.
+
+## 2026-11-02T22:00:00Z — Automode autorizado
+- Entrada do usuário: "pode comitar e assumir o automode".
+- Decisão: seguir B4→B10 sem parar a cada fase; perguntas de plano resolvidas pela opção recomendada e registradas como "decidido em automode (revisável)"; um commit por bolt após `db:test` + build + checagem via API verdes.
+- Limites: parar antes do B11 (Q10/Q13/Q14 em aberto) e de qualquer comando de nuvem; parar se surgir decisão sem opção claramente recomendada ou que contrarie uma RN.

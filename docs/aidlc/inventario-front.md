@@ -25,7 +25,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 | Usuários, papéis, vínculos | **banco (B1)**; o mock ainda é espelhado por e-mail para as telas | `auth.users` + `perfil` |
 | Hospitais, setores, especialidades | mock (constantes `SECTORS`, `SPECIALTIES`, `SECTOR_SPECIALTY`) | tabelas (B1) |
 | Plantões | **banco (B2)** em `/plantoes` e `/gestao`; `/assumir` e `/anunciar` ainda mock | `plantao` |
-| Anúncios | mock (`coverages`) | `anuncio` (B3–B7) |
+| Anúncios | **banco (B3)** em `/plantoes`, `/anunciar`, `/gestao`; `/assumir` ainda mock | `anuncio` + `anuncio_motivo` |
 | Elegibilidade | `checkEligibility()` no front | função SQL `elegivel()` (B4) |
 | Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
 | Histórico | mock (`audit`), mutável | `historico` append-only via trigger (B8) |
@@ -47,14 +47,14 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN04 | Plantão com hospital, setor, especialidade, início < fim | **coberta** (B2) | `plantao` + FKs + `check (fim > inicio)` + validação na RPC. Antes: Tipo `Shift` sem especialidade própria (deriva do setor); sem validação de fim > início |
 | RN05 | Só gestor do setor cria/edita/remove plantão | **coberta** (B2) | RPCs `criar/editar/remover_plantao` (setor do perfil, só antes do início); CRUD em `/gestao`. Antes: Não há tela nem ação de CRUD de plantão |
 | RN06 | Plantão aberto ou atribuído | **coberta** (B2) | coluna gerada `status`. Antes: Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
-| RN06b | Troca só via anúncio | parcial | Anúncio existe |
+| RN06b | Troca só via anúncio | **coberta** (B3) | não existe RPC de troca direta; `anunciar` é o único caminho. Antes: Anúncio existe |
 | RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | falta | `takeShift` atribui direto, sem aprovação |
-| RN07 | Só o dono anuncia, antes do início | parcial | Lista só plantões do usuário; não checa início |
-| RN08 | Máx. 1 anúncio aberto por plantão | parcial | Implícito (plantão anunciado sai da lista); sem garantia |
-| RN09 | Urgência obrigatória, motivo opcional | parcial | Motivo obrigatório; 3 urgências |
-| RN09b | Motivo = categoria (Saúde/Pessoal/Outro) + texto opcional | falta | Lista fixa de 5 motivos, sem texto |
-| RN09c | Urgência Normal / Urgente | falta | "Hoje / Até 3 dias / Mais de 3 dias" |
-| RN10 | Prazo 24h/48h ou início, o que vier primeiro | falta | Sem prazo |
+| RN07 | Só o dono anuncia, antes do início | **coberta** (B3) | RPC `anunciar`. Antes: Lista só plantões do usuário; não checa início |
+| RN08 | Máx. 1 anúncio aberto por plantão | **coberta** (B3) | índice único parcial (aberto+pendente). Antes: Implícito (plantão anunciado sai da lista); sem garantia |
+| RN09 | Urgência obrigatória, motivo opcional | **coberta** (B3) | Antes: Motivo obrigatório; 3 urgências |
+| RN09b | Motivo = categoria (Saúde/Pessoal/Outro) + texto opcional | **coberta** (B3) | `anuncio_motivo`, texto ≤ 500. Antes: Lista fixa de 5 motivos, sem texto |
+| RN09c | Urgência Normal / Urgente | **coberta** (B3) | enum `urgencia`. Antes: "Hoje / Até 3 dias / Mais de 3 dias" |
+| RN10 | Prazo 24h/48h ou início, o que vier primeiro | **coberta** (B3) | `expira_em` calculado na RPC. Antes: Sem prazo |
 | RN11 | Só elegíveis são avisados | parcial | `publish` notifica `eligibleDoctors` (só front) |
 | RN12 | Mesmo hospital e setor | parcial | `checkEligibility` |
 | RN12b | Mesma categoria | falta | Não há categoria |
@@ -79,9 +79,9 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN26 | Histórico imutável | falta | Array em memória |
 | RN27 | Exportar CSV | parcial | Botão em `/gestao` gera CSV do mock (reaproveitável) |
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
-| RN29 | Motivo nunca exposto a outros profissionais | parcial | Só aparece em `/gestao`, mas o dado está no store de todos |
+| RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 7 · parcial 18 · falta 16 (após B2).
+**Totais (41 RNs):** coberta 15 · parcial 13 · falta 13 (após B3).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

@@ -3,6 +3,82 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      anuncio: {
+        Row: {
+          anunciante_id: string;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        ComputedFields: never;
+        Insert: {
+          anunciante_id: string;
+          atualizado_em?: string;
+          criado_em?: string;
+          expira_em: string;
+          id?: string;
+          plantao_id: string;
+          status?: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        Update: {
+          anunciante_id?: string;
+          atualizado_em?: string;
+          criado_em?: string;
+          expira_em?: string;
+          id?: string;
+          plantao_id?: string;
+          status?: Database["public"]["Enums"]["status_anuncio"];
+          urgencia?: Database["public"]["Enums"]["urgencia"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "anuncio_anunciante_id_fkey";
+            columns: ["anunciante_id"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "anuncio_plantao_id_fkey";
+            columns: ["plantao_id"];
+            isOneToOne: false;
+            referencedRelation: "plantao";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      anuncio_motivo: {
+        Row: {
+          anuncio_id: string;
+          categoria: Database["public"]["Enums"]["motivo_categoria"];
+          texto: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          anuncio_id: string;
+          categoria: Database["public"]["Enums"]["motivo_categoria"];
+          texto?: string | null;
+        };
+        Update: {
+          anuncio_id?: string;
+          categoria?: Database["public"]["Enums"]["motivo_categoria"];
+          texto?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "anuncio_motivo_anuncio_id_fkey";
+            columns: ["anuncio_id"];
+            isOneToOne: true;
+            referencedRelation: "anuncio";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       especialidade: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_profissional"];
@@ -217,6 +293,30 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      anunciar: {
+        Args: {
+          p_motivo_categoria?: Database["public"]["Enums"]["motivo_categoria"];
+          p_motivo_texto?: string;
+          p_plantao_id: string;
+          p_urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        Returns: {
+          anunciante_id: string;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       criar_plantao: {
         Args: {
           p_especialidade_id: string;
@@ -276,7 +376,10 @@ export type Database = {
     };
     Enums: {
       categoria_profissional: "medico" | "enfermeiro";
+      motivo_categoria: "saude" | "pessoal" | "outro";
       papel: "profissional" | "gestor";
+      status_anuncio: "aberto" | "pendente" | "aprovado" | "recusado" | "cancelado" | "expirado";
+      urgencia: "normal" | "urgente";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -389,7 +492,10 @@ export const Constants = {
   public: {
     Enums: {
       categoria_profissional: ["medico", "enfermeiro"],
+      motivo_categoria: ["saude", "pessoal", "outro"],
       papel: ["profissional", "gestor"],
+      status_anuncio: ["aberto", "pendente", "aprovado", "recusado", "cancelado", "expirado"],
+      urgencia: ["normal", "urgente"],
     },
   },
 } as const;

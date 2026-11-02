@@ -4,7 +4,9 @@ import { supabase } from "../supabase";
 import type { Database } from "../database.types";
 
 type Tables = Database["public"]["Tables"];
+export type AnuncioResumo = Pick<Tables["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em">;
 export type Plantao = Tables["plantao"]["Row"] & {
+  anuncio: AnuncioResumo[];
   especialidade: { nome: string } | null;
   profissional: { nome: string } | null;
   setor: { nome: string } | null;
@@ -20,10 +22,16 @@ export interface PlantaoInput {
   profissionalId: string | null;
 }
 
-const SELECT = "*, especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome), setor(nome), hospital(nome)";
+const SELECT = "*, anuncio(id, status, urgencia, expira_em), especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome), setor(nome), hospital(nome)";
+
+// Anúncio "em aberto" (RN08 / decisão B3/P1): pendente, ou aberto ainda no prazo. Espelho da regra do banco, só para exibição.
+export function anuncioAtivo(p: Plantao): AnuncioResumo | null {
+  const agora = Date.now();
+  return p.anuncio.find((a) => a.status === "pendente" || (a.status === "aberto" && new Date(a.expira_em).getTime() > agora)) ?? null;
+}
 
 // Erros das RPCs já vêm com a mensagem da regra (ex.: "RN14: ...")
-function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
+export function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
   if (error) throw new Error(error.message);
   return data as T;
 }

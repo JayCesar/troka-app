@@ -4,6 +4,7 @@ import { UserPlus, Download, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, MockOnly } from "@/components/AppShell";
 import { PlantoesSetor } from "@/components/gestao/PlantoesSetor";
+import { AnunciosSetor } from "@/components/gestao/AnunciosSetor";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
 export const Route = createFileRoute("/gestao")({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/gestao")({
 function Page() {
   return (
     <div className="space-y-8">
+      <AnunciosSetor />
       <PlantoesSetor />
       <MockOnly bolt="B5–B9">
         <MockGestao />
