@@ -28,3 +28,10 @@
 - Aprovação: pendente.
 - Resposta P1 (2026-11-02T18:40:00Z): profissional elegível se candidata a plantão aberto e o gestor aprova; automático se o profissional estiver na lista de confiança do setor (a mesma da RN19b). Nova regra **RN06c** em `regras-de-negocio.md`. Bolts: candidatura no B4 (com elegibilidade), auto-aprovação no B5 (com a lista de confiança).
 - Aprovação: aprovado (Fase 3).
+
+## 2026-11-02T19:00:00Z — B1 (Base, Auth e isolamento) — plano
+- Plano: `docs/aidlc/construction/b1-base-auth/plano.md`.
+- Respostas: P1 A (e-mail+senha), P2 A (gestor só administrativo), P3 A (especialidades globais via migration), P4 A (seed com e-mails do mock + enfermeiros, senha `troka123`).
+- Aprovação: aprovado; execução iniciada.
+- Execução B1 (2026-11-02T19:40:00Z): migration `20261102183603_b1_base.sql` (hospital, setor, especialidade, perfil, schema `app`, RLS), `seed.sql` (2 hospitais, 6 setores, 15 usuários, senha `troka123`), `supabase/tests/b1_isolamento.test.sql` 16/16. Front: `lib/auth.tsx`, login real, AppShell por `perfil`; mock espelhado por e-mail até B2–B9.
+- Aprovação: aprovado pelo usuário (testes manuais ok) em 2026-11-02T19:55:00Z.

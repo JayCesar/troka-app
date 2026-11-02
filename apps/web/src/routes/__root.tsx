@@ -8,6 +8,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { TrokaProvider } from "../lib/troka";
+import { AuthProvider } from "../lib/auth";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -80,8 +81,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <HeadContent />
       <TrokaProvider>
-        <Outlet />
-        <Toaster position="top-center" richColors />
+        <AuthProvider>
+          <Outlet />
+          <Toaster position="top-center" richColors />
+        </AuthProvider>
       </TrokaProvider>
     </QueryClientProvider>
   );

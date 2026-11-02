@@ -15,7 +15,7 @@ export const Route = createFileRoute("/anunciar")({
       { property: "og:description", content: "Peça cobertura para um plantão que você não poderá cumprir." },
     ],
   }),
-  component: () => <AppShell title="Anunciar plantão" role="medico"><Page /></AppShell>,
+  component: () => <AppShell title="Anunciar plantão" role="profissional"><Page /></AppShell>,
 });
 
 const URG: Urgency[] = ["Hoje", "Até 3 dias", "Mais de 3 dias"];

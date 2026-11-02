@@ -22,7 +22,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 
 | Dado | Origem hoje | Destino |
 |---|---|---|
-| Usuários, papéis, vínculos | mock (`users`) | `auth.users` + `profissional` (B1) |
+| Usuários, papéis, vínculos | **banco (B1)**; o mock ainda é espelhado por e-mail para as telas | `auth.users` + `perfil` |
 | Hospitais, setores, especialidades | mock (constantes `SECTORS`, `SPECIALTIES`, `SECTOR_SPECIALTY`) | tabelas (B1) |
 | Plantões | mock (`shifts`) | `plantao` (B2) |
 | Anúncios | mock (`coverages`) | `anuncio` (B3–B7) |
@@ -30,7 +30,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 | Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
 | Histórico | mock (`audit`), mutável | `historico` append-only via trigger (B8) |
 | Notificações | mock (`notices`) | tabela/realtime (B4/B5) |
-| Login | e-mail sem senha | Supabase Auth (B1) |
+| Login | **Supabase Auth (B1, feito)** — e-mail + senha | — |
 | Logo | `/favicon.png` provisório | asset final em `public/` |
 
 ## 3. RN × onde está implementada
@@ -39,11 +39,11 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 
 | RN | Regra (resumo) | Status | Onde / observação |
 |---|---|---|---|
-| RN01 | Profissional ↔ hospital, setor, categoria, especialidade | parcial | `User`: só médico (sem enfermeiro), vários hospitais/setores (Q6 = 1 hospital) |
+| RN01 | Profissional ↔ hospital, setor, categoria, especialidade | **coberta** (B1) | `perfil` + FKs compostas + CHECK por papel; cadastro pela gestão vem no B10. Antes: `User`: só médico (sem enfermeiro), vários hospitais/setores (Q6 = 1 hospital) |
 | RN01b | CRM/COREN + UF validados no cadastro pelo gestor | falta | Form só tem campo CRM livre, sem UF, sem COREN, sem validação |
-| RN02 | Papel definido pelo hospital | parcial | `role` fixo no seed; cadastro sempre cria "medico" |
-| RN03 | Vê só dados do próprio hospital e setor | parcial | Filtros de tela (`assumir`, `gestao`); sem RLS |
-| RN30 | Isolamento entre hospitais | falta | Store global com todos os hospitais |
+| RN02 | Papel definido pelo hospital | **coberta** (B1) | enum `papel`; escrita em `perfil` bloqueada via API. Antes: `role` fixo no seed; cadastro sempre cria "medico" |
+| RN03 | Vê só dados do próprio hospital e setor | **coberta** (B1) | RLS em `hospital`/`setor`/`perfil` via `app.meu_setor()`; cada bolt novo estende às suas tabelas. Antes: Filtros de tela (`assumir`, `gestao`); sem RLS |
+| RN30 | Isolamento entre hospitais | **coberta** (B1) | RLS via `app.meu_hospital()`; testado. Antes: Store global com todos os hospitais |
 | RN04 | Plantão com hospital, setor, especialidade, início < fim | parcial | Tipo `Shift` sem especialidade própria (deriva do setor); sem validação de fim > início |
 | RN05 | Só gestor do setor cria/edita/remove plantão | falta | Não há tela nem ação de CRUD de plantão |
 | RN06 | Plantão aberto ou atribuído | parcial | Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
@@ -81,7 +81,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | parcial | Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 0 · parcial 23 · falta 18.
+**Totais (41 RNs):** coberta 4 · parcial 20 · falta 17 (após B1).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

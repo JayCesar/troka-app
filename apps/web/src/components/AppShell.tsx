@@ -3,27 +3,40 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Bell, CalendarCheck, HandHelping, Megaphone, ShieldCheck, LogOut } from "lucide-react";
 const LOGO_URL = "/favicon.png"; // TODO: trocar pelo logo final em public/troka-logo.png
 import { fmtDateTime, useTroka } from "@/lib/troka";
+import { homeFor, useAuth, type Papel } from "@/lib/auth";
 
 export function Logo({ size = 36 }: { size?: number }) {
   return <img src={LOGO_URL} alt="TroKa" width={size} height={size} className="rounded-xl" />;
 }
 
-export function AppShell({ title, role, children }: { title: string; role?: "medico" | "gestor"; children: ReactNode }) {
-  const { user, state, logout, markRead } = useTroka();
+export function AppShell({ title, role, children }: { title: string; role?: Papel; children: ReactNode }) {
+  const { loading, session, perfil, signOut } = useAuth();
+  const { user, state, markRead } = useTroka();
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
-  useEffect(() => setMounted(true), []);
   useEffect(() => {
-    if (!mounted) return;
-    if (!user) navigate({ to: "/" });
-    else if (role && user.role !== role) navigate({ to: user.role === "gestor" ? "/gestao" : "/plantoes" });
-  }, [mounted, user, role, navigate]);
-  if (!mounted || !user || (role && user.role !== role)) return null;
+    if (loading) return;
+    if (!session) navigate({ to: "/" });
+    else if (perfil && role && perfil.papel !== role) navigate({ to: homeFor(perfil.papel) });
+  }, [loading, session, perfil, role, navigate]);
+  if (loading || !session || (perfil && role && perfil.papel !== role)) return null;
 
-  const mine = state.notices.filter((n) => n.userId === user.id);
+  const logout = async () => { await signOut(); navigate({ to: "/" }); };
+
+  if (!perfil) {
+    return (
+      <div className="grid min-h-screen place-items-center px-6 text-center">
+        <div className="space-y-3">
+          <p className="font-semibold">Seu usuário não tem vínculo com hospital.</p>
+          <button className="btn btn-primary" onClick={() => void logout()}>Sair</button>
+        </div>
+      </div>
+    );
+  }
+
+  const mine = user ? state.notices.filter((n) => n.userId === user.id) : [];
   const unread = mine.filter((n) => !n.read).length;
-  const tabs = user.role === "gestor"
+  const tabs = perfil.papel === "gestor"
     ? [{ to: "/gestao" as const, label: "Gestão", icon: ShieldCheck }]
     : [
         { to: "/plantoes" as const, label: "Meus plantões", icon: CalendarCheck },
@@ -37,14 +50,14 @@ export function AppShell({ title, role, children }: { title: string; role?: "med
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <Logo size={34} />
           <div className="min-w-0 flex-1">
-            <p className="text-xs opacity-70">{user.name}</p>
+            <p className="truncate text-xs opacity-70">{perfil.nome} · {perfil.setor?.nome} · {perfil.hospital?.nome}</p>
             <h1 className="truncate text-lg font-bold">{title}</h1>
           </div>
           <button aria-label="Notificações" onClick={() => { setOpen(!open); if (!open) setTimeout(markRead, 1500); }} className="relative grid h-11 w-11 place-items-center rounded-full hover:bg-navy-foreground/10">
             <Bell className="h-5 w-5" />
             {unread > 0 && <span className="absolute right-1.5 top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">{unread}</span>}
           </button>
-          <button aria-label="Sair" onClick={() => { logout(); navigate({ to: "/" }); }} className="grid h-11 w-11 place-items-center rounded-full hover:bg-navy-foreground/10">
+          <button aria-label="Sair" onClick={() => void logout()} className="grid h-11 w-11 place-items-center rounded-full hover:bg-navy-foreground/10">
             <LogOut className="h-5 w-5" />
           </button>
         </div>
@@ -62,7 +75,12 @@ export function AppShell({ title, role, children }: { title: string; role?: "med
           </div>
         )}
       </header>
-      <main className="mx-auto max-w-3xl px-4 py-5">{children}</main>
+      <main className="mx-auto max-w-3xl px-4 py-5">
+        {user ? children : (
+          // TEMPORÁRIO: usuário existe no banco mas não no mock (ex.: enfermeiros). Telas reais chegam a partir do B2.
+          <p className="card p-5 text-sm text-muted-foreground">Login ok. Os dados desta tela ainda são de demonstração e não incluem o seu usuário; eles passam a vir do banco a partir do B2.</p>
+        )}
+      </main>
       {tabs.length > 1 && (
         <nav className="fixed inset-x-0 bottom-0 z-20 border-t bg-card">
           <div className="mx-auto grid max-w-3xl" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>

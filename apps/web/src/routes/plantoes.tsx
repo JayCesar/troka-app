@@ -13,7 +13,7 @@ export const Route = createFileRoute("/plantoes")({
       { property: "og:description", content: "Seus plantões confirmados em todos os hospitais." },
     ],
   }),
-  component: () => <AppShell title="Meus plantões" role="medico"><Page /></AppShell>,
+  component: () => <AppShell title="Meus plantões" role="profissional"><Page /></AppShell>,
 });
 
 function Page() {

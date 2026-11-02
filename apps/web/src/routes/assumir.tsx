@@ -15,7 +15,7 @@ export const Route = createFileRoute("/assumir")({
       { property: "og:description", content: "Plantões abertos e anúncios de cobertura nos seus hospitais." },
     ],
   }),
-  component: () => <AppShell title="Assumir plantão" role="medico"><Page /></AppShell>,
+  component: () => <AppShell title="Assumir plantão" role="profissional"><Page /></AppShell>,
 });
 
 function Page() {
