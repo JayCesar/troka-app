@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnunciarRouteImport } from './routes/anunciar'
 import { Route as AssumirRouteImport } from './routes/assumir'
+import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as GestaoRouteImport } from './routes/gestao'
 import { Route as PlantoesRouteImport } from './routes/plantoes'
@@ -29,6 +30,11 @@ const AnunciarRoute = AnunciarRouteImport.update({
 const AssumirRoute = AssumirRouteImport.update({
   id: '/assumir',
   path: '/assumir',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarioRoute = CalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
@@ -75,15 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/anunciar' | '/assumir' | '/definir-senha' | '/gestao' | '/plantoes'
+    | '/'
+    | '/anunciar'
+    | '/assumir'
+    | '/calendario'
+    | '/definir-senha'
+    | '/gestao'
+    | '/plantoes'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/anunciar' | '/assumir' | '/definir-senha' | '/gestao' | '/plantoes'
+    | '/'
+    | '/anunciar'
+    | '/assumir'
+    | '/calendario'
+    | '/definir-senha'
+    | '/gestao'
+    | '/plantoes'
   id:
     | '__root__'
     | '/'
     | '/anunciar'
     | '/assumir'
+    | '/calendario'
     | '/definir-senha'
     | '/gestao'
     | '/plantoes'
@@ -93,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnunciarRoute: typeof AnunciarRoute
   AssumirRoute: typeof AssumirRoute
+  CalendarioRoute: typeof CalendarioRoute
   DefinirSenhaRoute: typeof DefinirSenhaRoute
   GestaoRoute: typeof GestaoRoute
   PlantoesRoute: typeof PlantoesRoute
@@ -119,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/assumir'
       fullPath: '/assumir'
       preLoaderRoute: typeof AssumirRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendario': {
+      id: '/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof CalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/definir-senha': {
@@ -149,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnunciarRoute: AnunciarRoute,
   AssumirRoute: AssumirRoute,
+  CalendarioRoute: CalendarioRoute,
   DefinirSenhaRoute: DefinirSenhaRoute,
   GestaoRoute: GestaoRoute,
   PlantoesRoute: PlantoesRoute,

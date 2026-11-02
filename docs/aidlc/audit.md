@@ -93,3 +93,10 @@
 - Bugs encontrados no teste ponta a ponta e corrigidos (ver plano). Fixtures antigos ajustados para conselho único.
 - Pendente de decisão do usuário: provedor real de consulta ao conselho (modo `real` bloqueia até lá).
 - Automode encerrado aqui (limite: B11 depende de Q10/Q13/Q14; nuvem só a pedido).
+
+## 2026-11-03T01:30:00Z — M1 (Melhorias de UI) — plano
+- Entrada do usuário: calendário com arrastar e soltar, botão flutuante do assistente de IA (só UI), botão cadastrar/redesign com base em `exemplos/login.png`.
+- Decisões do usuário: D1 só gestor arrasta (médico visualiza); D2 serviço isolado + RPC real `editar_plantao`; D3 redesenhar login + cadastro do gestor.
+- Plano: `docs/aidlc/construction/m1-melhorias-ui/plano.md`. Aprovação: respostas do usuário; execução iniciada.
+- Execução M1 (2026-11-03T02:10:00Z): `/calendario` com @dnd-kit (gestor arrasta, médico visualiza, otimista com reversão), botão/painel do assistente (sem backend), login redesenhado (mostrar senha, manter conectado, esqueci a senha → /definir-senha), cadastro do gestor com rótulos e tela cheia no celular; serviços isolados em `lib/services/`; templates de e-mail pt-BR (convite e recuperação).
+- Aprovação: pendente (teste manual do usuário).

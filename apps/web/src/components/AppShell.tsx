@@ -1,16 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Bell, CalendarCheck, HandHelping, Megaphone, ShieldCheck, LogOut } from "lucide-react";
+import { Bell, CalendarCheck, CalendarDays, HandHelping, Megaphone, ShieldCheck, LogOut } from "lucide-react";
 const LOGO_URL = "/favicon.png"; // TODO: trocar pelo logo final em public/troka-logo.png
 import { fmtDateTime } from "@/lib/format";
 import { homeFor, useAuth, type Papel } from "@/lib/auth";
 import { useAvisos, useMarcarAvisosLidos } from "@/lib/api/avisos";
+import { AssistenteIA } from "@/components/AssistenteIA";
 
 export function Logo({ size = 36 }: { size?: number }) {
   return <img src={LOGO_URL} alt="TroKa" width={size} height={size} className="rounded-xl" />;
 }
 
-export function AppShell({ title, role, children }: { title: string; role?: Papel; children: ReactNode }) {
+export function AppShell({ title, role, wide, children }: { title: string; role?: Papel; wide?: boolean; children: ReactNode }) {
   const { loading, session, perfil, signOut } = useAuth();
   const avisos = useAvisos();
   const marcarLidos = useMarcarAvisosLidos();
@@ -39,9 +40,13 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
   const mine = avisos.data ?? [];
   const unread = mine.filter((n) => !n.lido_em).length;
   const tabs = perfil.papel === "gestor"
-    ? [{ to: "/gestao" as const, label: "Gestão", icon: ShieldCheck }]
+    ? [
+        { to: "/gestao" as const, label: "Gestão", icon: ShieldCheck },
+        { to: "/calendario" as const, label: "Calendário", icon: CalendarDays },
+      ]
     : [
         { to: "/plantoes" as const, label: "Meus plantões", icon: CalendarCheck },
+        { to: "/calendario" as const, label: "Calendário", icon: CalendarDays },
         { to: "/assumir" as const, label: "Assumir", icon: HandHelping },
         { to: "/anunciar" as const, label: "Anunciar", icon: Megaphone },
       ];
@@ -77,7 +82,8 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
           </div>
         )}
       </header>
-      <main className="mx-auto max-w-3xl px-4 py-5">{children}</main>
+      <main className={`mx-auto px-4 py-5 ${wide ? "max-w-6xl" : "max-w-3xl"}`}>{children}</main>
+      <AssistenteIA />
       {tabs.length > 1 && (
         <nav className="fixed inset-x-0 bottom-0 z-20 border-t bg-card">
           <div className="mx-auto grid max-w-3xl" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
