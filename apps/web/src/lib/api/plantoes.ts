@@ -85,7 +85,7 @@ export function useProfissionaisSetor() {
 
 function useInvalidatePlantoes() {
   const qc = useQueryClient();
-  return () => qc.invalidateQueries({ queryKey: ["plantoes"] });
+  return () => Promise.all(["plantoes", "painel", "historico"].map((k) => qc.invalidateQueries({ queryKey: [k] })));
 }
 
 const args = (i: PlantaoInput) => ({

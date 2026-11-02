@@ -853,6 +853,16 @@ export type Database = {
           urgencia: Database["public"]["Enums"]["urgencia"];
         }[];
       };
+      painel_do_setor: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          a_vencer: number;
+          alertas: number;
+          em_aberto: number;
+          pendencias: number;
+          urgentes: number;
+        }[];
+      };
       pendencias_do_setor: {
         Args: Record<PropertyKey, never>;
         Returns: {

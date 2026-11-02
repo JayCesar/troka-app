@@ -64,7 +64,7 @@ function useAcaoGestor<A>(fn: (a: A) => Promise<unknown>) {
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      for (const k of ["pendencias", "equipe", "plantoes", "anuncios", "avisos", "alertas"]) void qc.invalidateQueries({ queryKey: [k] });
+      for (const k of ["pendencias", "equipe", "plantoes", "anuncios", "avisos", "alertas", "painel", "historico"]) void qc.invalidateQueries({ queryKey: [k] });
     },
   });
 }

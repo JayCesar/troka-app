@@ -78,10 +78,10 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN25 | Toda mudança registrada | **coberta** (B8) | triggers em 7 tabelas gravam `historico` (inclui ações do pg_cron como "Sistema"). |
 | RN26 | Histórico imutável | **coberta** (B8) | sem escrita via API + trigger bloqueia UPDATE/DELETE/TRUNCATE para qualquer papel. |
 | RN27 | Exportar CSV | **coberta** (B8) | `historico_do_setor` + CSV (`;` + BOM) na gestão. |
-| RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
+| RN28 | Painel: abertos, urgentes, a vencer, alertas | **coberta** (B9) | `painel_do_setor` (abertos, urgentes, a vencer ≤ 6h, alertas, pendências). |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 39 · parcial 1 · falta 1 (após B8).
+**Totais (41 RNs):** coberta 40 · parcial 0 · falta 1 (após B9).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

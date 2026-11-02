@@ -9,6 +9,7 @@ import { Pendencias } from "@/components/gestao/Pendencias";
 import { Alertas } from "@/components/gestao/Alertas";
 import { Equipe } from "@/components/gestao/Equipe";
 import { Historico } from "@/components/gestao/Historico";
+import { Painel } from "@/components/gestao/Painel";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
 export const Route = createFileRoute("/gestao")({
@@ -26,45 +27,26 @@ export const Route = createFileRoute("/gestao")({
 function Page() {
   return (
     <div className="space-y-8">
+      <Painel />
       <Alertas />
       <Pendencias />
       <AnunciosSetor />
       <PlantoesSetor />
       <Equipe />
       <Historico />
-      <MockOnly bolt="B9–B10">
+      <MockOnly bolt="B10">
         <MockGestao />
       </MockOnly>
     </div>
   );
 }
 
-// TEMPORÁRIO: painel e cadastro mock até B9–B10.
+// TEMPORÁRIO: cadastro mock até o B10.
 function MockGestao() {
-  const { user, state, hospital, name, decide } = useTroka();
   const [form, setForm] = useState(false);
-  const hid = user!.memberships[0]!.hospitalId;
-  const hs = state.shifts.filter((s) => s.hospitalId === hid);
-  const open = hs.filter((s) => s.status === "aberto");
-  const pending = state.coverages.filter((c) => c.status === "pendente" && hs.some((s) => s.id === c.shiftId));
-  const alerts = open.filter((s) => eligibleDoctors(state, s).length === 0);
-
 
   return (
     <div className="space-y-6">
-      <p className="text-sm font-semibold text-muted-foreground">{hospital(hid).name}</p>
-      <div className="grid grid-cols-3 gap-3">
-        {[["Em aberto", open.length], ["Trocas pendentes", pending.length], ["Alertas de regra", alerts.length]].map(([l, v]) => (
-          <div key={l} className="card p-4"><p className="text-3xl font-bold text-primary">{v}</p><p className="text-xs font-medium text-muted-foreground">{l}</p></div>
-        ))}
-      </div>
-      {alerts.length > 0 && (
-        <div className="rounded-xl bg-warning/15 p-3 text-sm text-warning">
-          {alerts.map((s) => <p key={s.id}>Nenhum médico elegível para {s.sector} em {fmtDay(s.start)} {fmtTime(s.start)}.</p>)}
-        </div>
-      )}
-
-
       <button className="btn btn-outline w-full" onClick={() => setForm(true)}><UserPlus className="h-4 w-4" />Cadastrar profissional</button>
 
       {form && <ProfessionalForm onClose={() => setForm(false)} />}

@@ -81,3 +81,8 @@
 - Decisões automode (revisáveis) P1–P5 em `docs/aidlc/construction/b8-historico/plano.md`.
 - Execução: migration `20261102194614_b8_historico.sql` (`historico`, trigger genérico em 7 tabelas, imutabilidade por trigger, `historico_do_setor`), `b8_historico.test.sql` 16/16 (total 158/158). Front: histórico real + CSV completo na gestão (mock removido).
 - Aprovação: automode.
+
+## 2026-11-03T00:30:00Z — B9 (Painel de gestão) — automode
+- Decisões automode (revisáveis) P1–P3 em `docs/aidlc/construction/b9-painel/plano.md` ("a vencer" = ≤ 6h).
+- Execução: migration `20261102195146_b9_painel.sql` (`painel_do_setor`), `b9_painel.test.sql` 6/6 (total 164/164). Front: indicadores no topo da gestão; painel mock removido.
+- Aprovação: automode.
