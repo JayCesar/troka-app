@@ -1,43 +1,32 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+
 import { AppShell } from "@/components/AppShell";
-import { ShiftCard } from "@/components/ShiftCard";
-import { useTroka } from "@/lib/troka";
+import { PlantaoCard } from "@/components/PlantaoCard";
+import { useAuth } from "@/lib/auth";
+import { useMeusPlantoes } from "@/lib/api/plantoes";
 
 export const Route = createFileRoute("/plantoes")({
   head: () => ({
     meta: [
       { title: "Meus plantões — TroKa" },
-      { name: "description", content: "Seus plantões confirmados em todos os hospitais." },
-      { property: "og:title", content: "Meus plantões — TroKa" },
-      { property: "og:description", content: "Seus plantões confirmados em todos os hospitais." },
+      { name: "description", content: "Seus próximos plantões." },
     ],
   }),
   component: () => <AppShell title="Meus plantões" role="profissional"><Page /></AppShell>,
 });
 
 function Page() {
-  const { user, state, hospital } = useTroka();
-  const [hf, setHf] = useState<string | null>(null);
-  const mine = state.shifts
-    .filter((s) => s.doctorId === user!.id && s.status !== "aberto" && (!hf || s.hospitalId === hf))
-    .sort((a, b) => a.start - b.start);
+  const { perfil } = useAuth();
+  const { data, isLoading, error } = useMeusPlantoes(perfil!.id);
+
+  if (isLoading) return <p className="card p-6 text-center text-muted-foreground">Carregando…</p>;
+  if (error) return <p className="card p-6 text-center text-destructive">Erro ao carregar plantões: {error.message}</p>;
+
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 overflow-x-auto">
-        <button onClick={() => setHf(null)} className={`chip ${!hf ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>Todos</button>
-        {user!.memberships.map((m) => (
-          <button key={m.hospitalId} onClick={() => setHf(m.hospitalId)} className={`chip ${hf === m.hospitalId ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>{hospital(m.hospitalId).name}</button>
-        ))}
-      </div>
-      {mine.length === 0 && <p className="card p-6 text-center text-muted-foreground">Nenhum plantão por aqui.</p>}
-      {mine.map((s) => (
-        <ShiftCard key={s.id} shift={s}>
-          {s.status === "confirmado" && (
-            <Link to="/anunciar" search={{ shift: s.id }} className="btn btn-outline w-full">Pedir cobertura</Link>
-          )}
-        </ShiftCard>
-      ))}
+      {data?.length === 0 && <p className="card p-6 text-center text-muted-foreground">Nenhum plantão por aqui.</p>}
+      {/* "Pedir cobertura" volta no B3, com o anúncio no banco */}
+      {data?.map((p) => <PlantaoCard key={p.id} plantao={p} />)}
     </div>
   );
 }

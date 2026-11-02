@@ -59,3 +59,44 @@ select pg_temp.usuario('30000000-0000-0000-0000-000000000005', 'helena@santaclar
 select pg_temp.usuario('40000000-0000-0000-0000-000000000005', 'pedro@troka.app',           'Dr. Pedro Nogueira','20000000-0000-0000-0000-000000000021', 'profissional', 'medico', 'Intensivista', '567890', 'SP');
 select pg_temp.usuario('40000000-0000-0000-0000-000000000007', 'tiago@troka.app',           'Dr. Tiago Moura',   '20000000-0000-0000-0000-000000000023', 'profissional', 'medico', 'Clínico',      '789012', 'SP');
 select pg_temp.usuario('50000000-0000-0000-0000-000000000003', 'camila@troka.app',          'Enf. Camila Torres','20000000-0000-0000-0000-000000000023', 'profissional', 'enfermeiro', 'Enfermagem Clínica', '555666', 'SP');
+
+-- ---------------------------------------------------------------------------
+-- Plantões (B2): próximas 2 semanas, relativos à data do `db reset`, horário de Brasília.
+-- Passam pelo trigger de validação (setor, especialidade, sobreposição, 11h).
+-- ---------------------------------------------------------------------------
+create function pg_temp.plantao(p_setor uuid, p_especialidade text, p_dia int, p_hora int, p_horas int, p_prof uuid default null)
+returns void language sql as $$
+  insert into public.plantao (hospital_id, setor_id, especialidade_id, inicio, fim, profissional_id, criado_por)
+  select s.hospital_id, s.id, e.id,
+         ((current_date + p_dia) + make_time(p_hora, 0, 0)) at time zone 'America/Sao_Paulo',
+         ((current_date + p_dia) + make_time(p_hora, 0, 0)) at time zone 'America/Sao_Paulo' + make_interval(hours => p_horas),
+         p_prof,
+         (select g.id from public.perfil g where g.setor_id = s.id and g.papel = 'gestor' limit 1)
+  from public.setor s, public.especialidade e
+  where s.id = p_setor and e.nome = p_especialidade $$;
+
+-- Vila Nova · Clínica Médica (gestora Ana)
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 1, 7, 12, '40000000-0000-0000-0000-000000000001');  -- Carlos
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 4, 7, 12, '40000000-0000-0000-0000-000000000001');  -- Carlos
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 6, 19, 12, '40000000-0000-0000-0000-000000000001'); -- Carlos (noturno)
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 2, 7, 12, '40000000-0000-0000-0000-000000000004');  -- Juliana
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 5, 19, 12, '40000000-0000-0000-0000-000000000004'); -- Juliana
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Enfermagem Clínica', 1, 7, 12, '50000000-0000-0000-0000-000000000001'); -- Fernanda
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Enfermagem Clínica', 3, 7, 12, '50000000-0000-0000-0000-000000000001'); -- Fernanda
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 2, 19, 12);  -- aberto
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Clínico', 8, 7, 12);   -- aberto
+select pg_temp.plantao('20000000-0000-0000-0000-000000000013', 'Enfermagem Clínica', 4, 19, 12); -- aberto
+
+-- Vila Nova · Pronto-Socorro (gestor Paulo)
+select pg_temp.plantao('20000000-0000-0000-0000-000000000012', 'Emergencista', 1, 19, 12, '40000000-0000-0000-0000-000000000003'); -- Rafael
+select pg_temp.plantao('20000000-0000-0000-0000-000000000012', 'Emergencista', 3, 7, 12, '40000000-0000-0000-0000-000000000006');  -- Marina
+select pg_temp.plantao('20000000-0000-0000-0000-000000000012', 'Enfermagem em Emergência', 2, 19, 12, '50000000-0000-0000-0000-000000000002'); -- Lucas
+select pg_temp.plantao('20000000-0000-0000-0000-000000000012', 'Emergencista', 2, 7, 12);  -- aberto
+select pg_temp.plantao('20000000-0000-0000-0000-000000000012', 'Enfermagem em Emergência', 5, 7, 12); -- aberto
+
+-- Santa Clara · UTI Adulto (gestora Helena) e Clínica Médica (gestor Roberto)
+select pg_temp.plantao('20000000-0000-0000-0000-000000000021', 'Intensivista', 2, 7, 12, '40000000-0000-0000-0000-000000000005'); -- Pedro
+select pg_temp.plantao('20000000-0000-0000-0000-000000000021', 'Intensivista', 3, 19, 12); -- aberto
+select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Clínico', 1, 7, 12, '40000000-0000-0000-0000-000000000007');  -- Tiago
+select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Enfermagem Clínica', 2, 7, 12, '50000000-0000-0000-0000-000000000003'); -- Camila
+select pg_temp.plantao('20000000-0000-0000-0000-000000000023', 'Clínico', 4, 7, 12); -- aberto

@@ -35,3 +35,11 @@
 - Aprovação: aprovado; execução iniciada.
 - Execução B1 (2026-11-02T19:40:00Z): migration `20261102183603_b1_base.sql` (hospital, setor, especialidade, perfil, schema `app`, RLS), `seed.sql` (2 hospitais, 6 setores, 15 usuários, senha `troka123`), `supabase/tests/b1_isolamento.test.sql` 16/16. Front: `lib/auth.tsx`, login real, AppShell por `perfil`; mock espelhado por e-mail até B2–B9.
 - Aprovação: aprovado pelo usuário (testes manuais ok) em 2026-11-02T19:55:00Z.
+
+## 2026-11-02T20:00:00Z — B2 (Plantões) — plano
+- B1 commitado (`246ee54`). Plano B2: `docs/aidlc/construction/b2-plantoes/plano.md`; perguntas em `perguntas.md`.
+- Respostas: A em tudo (P1 escala atribuída; P2 RN12–RN15 já no B2; P3 só antes do início; P4 gestor corrige dono; P5 sem limite).
+- Aprovação: aprovado; execução iniciada.
+- Execução B2 (2026-11-02T20:40:00Z): migration `20261102185142_b2_plantoes.sql` (tabela `plantao`, `app.motivos_inelegibilidade`, trigger de atribuição, RLS, RPCs `criar/editar/remover_plantao`), seed com 20 plantões, `b2_plantoes.test.sql` 20/20 (total 36/36). Front: `/plantoes` real, seção "Plantões do setor" em `/gestao`, `MockOnly` nas telas ainda mock.
+- Ajuste pós-feedback: formulário de plantão com data + turno (Diurno/Noturno/Personalizado), resumo, especialidades do setor primeiro.
+- Aprovação: aprovado pelo usuário (teste manual ok) em 2026-11-02T21:00:00Z.

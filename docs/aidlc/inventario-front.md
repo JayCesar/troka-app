@@ -24,7 +24,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 |---|---|---|
 | Usuários, papéis, vínculos | **banco (B1)**; o mock ainda é espelhado por e-mail para as telas | `auth.users` + `perfil` |
 | Hospitais, setores, especialidades | mock (constantes `SECTORS`, `SPECIALTIES`, `SECTOR_SPECIALTY`) | tabelas (B1) |
-| Plantões | mock (`shifts`) | `plantao` (B2) |
+| Plantões | **banco (B2)** em `/plantoes` e `/gestao`; `/assumir` e `/anunciar` ainda mock | `plantao` |
 | Anúncios | mock (`coverages`) | `anuncio` (B3–B7) |
 | Elegibilidade | `checkEligibility()` no front | função SQL `elegivel()` (B4) |
 | Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
@@ -44,9 +44,9 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN02 | Papel definido pelo hospital | **coberta** (B1) | enum `papel`; escrita em `perfil` bloqueada via API. Antes: `role` fixo no seed; cadastro sempre cria "medico" |
 | RN03 | Vê só dados do próprio hospital e setor | **coberta** (B1) | RLS em `hospital`/`setor`/`perfil` via `app.meu_setor()`; cada bolt novo estende às suas tabelas. Antes: Filtros de tela (`assumir`, `gestao`); sem RLS |
 | RN30 | Isolamento entre hospitais | **coberta** (B1) | RLS via `app.meu_hospital()`; testado. Antes: Store global com todos os hospitais |
-| RN04 | Plantão com hospital, setor, especialidade, início < fim | parcial | Tipo `Shift` sem especialidade própria (deriva do setor); sem validação de fim > início |
-| RN05 | Só gestor do setor cria/edita/remove plantão | falta | Não há tela nem ação de CRUD de plantão |
-| RN06 | Plantão aberto ou atribuído | parcial | Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
+| RN04 | Plantão com hospital, setor, especialidade, início < fim | **coberta** (B2) | `plantao` + FKs + `check (fim > inicio)` + validação na RPC. Antes: Tipo `Shift` sem especialidade própria (deriva do setor); sem validação de fim > início |
+| RN05 | Só gestor do setor cria/edita/remove plantão | **coberta** (B2) | RPCs `criar/editar/remover_plantao` (setor do perfil, só antes do início); CRUD em `/gestao`. Antes: Não há tela nem ação de CRUD de plantão |
+| RN06 | Plantão aberto ou atribuído | **coberta** (B2) | coluna gerada `status`. Antes: Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
 | RN06b | Troca só via anúncio | parcial | Anúncio existe |
 | RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | falta | `takeShift` atribui direto, sem aprovação |
 | RN07 | Só o dono anuncia, antes do início | parcial | Lista só plantões do usuário; não checa início |
@@ -59,7 +59,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN12 | Mesmo hospital e setor | parcial | `checkEligibility` |
 | RN12b | Mesma categoria | falta | Não há categoria |
 | RN13 | Especialidade idêntica | parcial | `checkEligibility` (via setor→especialidade) |
-| RN14 | Sem sobreposição + 11h de descanso, incluindo trocas | parcial | `checkEligibility` (11h configurável por hospital + limite semanal extra, fora das RN) |
+| RN14 | Sem sobreposição + 11h de descanso, incluindo trocas | parcial | **banco (B2)**: `app.motivos_inelegibilidade` + trigger em toda atribuição; falta aplicar ao assumir (B4). Antes: `checkEligibility` (11h configurável por hospital + limite semanal extra, fora das RN) |
 | RN15 | Ninguém assume o próprio plantão | parcial | Filtra `requesterId !== user`; não revalida |
 | RN16 | Revalidar elegibilidade na aprovação | falta | `decide` não revalida |
 | RN19 | Coordenação aprova/recusa com um clique | parcial | `decide` em `/gestao` |
@@ -81,7 +81,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | parcial | Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 4 · parcial 20 · falta 17 (após B1).
+**Totais (41 RNs):** coberta 7 · parcial 18 · falta 16 (após B2).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

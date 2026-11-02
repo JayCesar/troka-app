@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { UserPlus, Download, X } from "lucide-react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
+import { AppShell, MockOnly } from "@/components/AppShell";
+import { PlantoesSetor } from "@/components/gestao/PlantoesSetor";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
 export const Route = createFileRoute("/gestao")({
@@ -18,6 +19,18 @@ export const Route = createFileRoute("/gestao")({
 });
 
 function Page() {
+  return (
+    <div className="space-y-8">
+      <PlantoesSetor />
+      <MockOnly bolt="B5–B9">
+        <MockGestao />
+      </MockOnly>
+    </div>
+  );
+}
+
+// TEMPORÁRIO: painel/aprovações/histórico mock até B5–B9.
+function MockGestao() {
   const { user, state, hospital, name, decide } = useTroka();
   const [form, setForm] = useState(false);
   const hid = user!.memberships[0]!.hospitalId;

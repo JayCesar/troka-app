@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { CheckCircle2, Lock, Flame, Coins } from "lucide-react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
+import { AppShell, MockOnly } from "@/components/AppShell";
 import { ShiftCard } from "@/components/ShiftCard";
 import { checkEligibility, SECTORS, useTroka, type Shift, type Coverage } from "@/lib/troka";
 
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/assumir")({
       { property: "og:description", content: "Plantões abertos e anúncios de cobertura nos seus hospitais." },
     ],
   }),
-  component: () => <AppShell title="Assumir plantão" role="profissional"><Page /></AppShell>,
+  component: () => <AppShell title="Assumir plantão" role="profissional"><MockOnly bolt="B4"><Page /></MockOnly></AppShell>,
 });
 
 function Page() {

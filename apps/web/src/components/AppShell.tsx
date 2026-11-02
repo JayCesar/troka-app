@@ -75,12 +75,7 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
           </div>
         )}
       </header>
-      <main className="mx-auto max-w-3xl px-4 py-5">
-        {user ? children : (
-          // TEMPORÁRIO: usuário existe no banco mas não no mock (ex.: enfermeiros). Telas reais chegam a partir do B2.
-          <p className="card p-5 text-sm text-muted-foreground">Login ok. Os dados desta tela ainda são de demonstração e não incluem o seu usuário; eles passam a vir do banco a partir do B2.</p>
-        )}
-      </main>
+      <main className="mx-auto max-w-3xl px-4 py-5">{children}</main>
       {tabs.length > 1 && (
         <nav className="fixed inset-x-0 bottom-0 z-20 border-t bg-card">
           <div className="mx-auto grid max-w-3xl" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
@@ -94,4 +89,17 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
       )}
     </div>
   );
+}
+
+// TEMPORÁRIO: envolve telas que ainda leem o store mock (removido quando o bolt da tela chegar).
+export function MockOnly({ bolt, children }: { bolt: string; children: ReactNode }) {
+  const { user } = useTroka();
+  if (!user) {
+    return (
+      <p className="card p-5 text-sm text-muted-foreground">
+        Esta seção ainda usa dados de demonstração, que não incluem o seu usuário. Ela passa a vir do banco no {bolt}.
+      </p>
+    );
+  }
+  return <>{children}</>;
 }

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
+import { AppShell, MockOnly } from "@/components/AppShell";
 import { eligibleDoctors, fmtDay, fmtTime, REASONS, useTroka, type Urgency } from "@/lib/troka";
 
 export const Route = createFileRoute("/anunciar")({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/anunciar")({
       { property: "og:description", content: "Peça cobertura para um plantão que você não poderá cumprir." },
     ],
   }),
-  component: () => <AppShell title="Anunciar plantão" role="profissional"><Page /></AppShell>,
+  component: () => <AppShell title="Anunciar plantão" role="profissional"><MockOnly bolt="B3"><Page /></MockOnly></AppShell>,
 });
 
 const URG: Urgency[] = ["Hoje", "Até 3 dias", "Mais de 3 dias"];
