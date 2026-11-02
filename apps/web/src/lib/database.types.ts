@@ -373,6 +373,8 @@ export type Database = {
           categoria: Database["public"]["Enums"]["categoria_profissional"] | null;
           conselho_numero: string | null;
           conselho_uf: string | null;
+          conselho_validacao: Database["public"]["Enums"]["validacao_conselho"] | null;
+          conselho_validado_em: string | null;
           criado_em: string;
           especialidade_id: string | null;
           hospital_id: string;
@@ -386,6 +388,8 @@ export type Database = {
           categoria?: Database["public"]["Enums"]["categoria_profissional"] | null;
           conselho_numero?: string | null;
           conselho_uf?: string | null;
+          conselho_validacao?: Database["public"]["Enums"]["validacao_conselho"] | null;
+          conselho_validado_em?: string | null;
           criado_em?: string;
           especialidade_id?: string | null;
           hospital_id: string;
@@ -398,6 +402,8 @@ export type Database = {
           categoria?: Database["public"]["Enums"]["categoria_profissional"] | null;
           conselho_numero?: string | null;
           conselho_uf?: string | null;
+          conselho_validacao?: Database["public"]["Enums"]["validacao_conselho"] | null;
+          conselho_validado_em?: string | null;
           criado_em?: string;
           especialidade_id?: string | null;
           hospital_id?: string;
@@ -638,6 +644,48 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      cadastrar_profissional_interno: {
+        Args: {
+          p_categoria: Database["public"]["Enums"]["categoria_profissional"];
+          p_conselho_numero: string;
+          p_conselho_uf: string;
+          p_especialidade_id: string;
+          p_gestor_id: string;
+          p_nome: string;
+          p_usuario_id: string;
+          p_validacao: Database["public"]["Enums"]["validacao_conselho"];
+        };
+        Returns: {
+          categoria: Database["public"]["Enums"]["categoria_profissional"] | null;
+          conselho_numero: string | null;
+          conselho_uf: string | null;
+          conselho_validacao: Database["public"]["Enums"]["validacao_conselho"] | null;
+          conselho_validado_em: string | null;
+          criado_em: string;
+          especialidade_id: string | null;
+          hospital_id: string;
+          id: string;
+          nome: string;
+          papel: Database["public"]["Enums"]["papel"];
+          setor_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "perfil";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      cadastro_verificar: {
+        Args: {
+          p_categoria: Database["public"]["Enums"]["categoria_profissional"];
+          p_conselho_numero: string;
+          p_conselho_uf: string;
+          p_email: string;
+          p_especialidade_id: string;
+        };
+        Returns: string;
+      };
       cancelar_anuncio: {
         Args: { p_anuncio_id: string };
         Returns: {
@@ -808,6 +856,8 @@ export type Database = {
         Returns: {
           categoria: Database["public"]["Enums"]["categoria_profissional"];
           confiavel: boolean;
+          conselho: string;
+          conselho_validacao: Database["public"]["Enums"]["validacao_conselho"];
           especialidade: string;
           id: string;
           nome: string;
@@ -948,6 +998,7 @@ export type Database = {
       status_anuncio: "aberto" | "pendente" | "aprovado" | "recusado" | "cancelado" | "expirado";
       status_candidatura: "pendente" | "aprovada" | "recusada" | "desistida" | "cancelada";
       urgencia: "normal" | "urgente";
+      validacao_conselho: "verificado" | "simulado" | "nao_verificado";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1065,6 +1116,7 @@ export const Constants = {
       status_anuncio: ["aberto", "pendente", "aprovado", "recusado", "cancelado", "expirado"],
       status_candidatura: ["pendente", "aprovada", "recusada", "desistida", "cancelada"],
       urgencia: ["normal", "urgente"],
+      validacao_conselho: ["verificado", "simulado", "nao_verificado"],
     },
   },
 } as const;

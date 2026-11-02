@@ -2,8 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 import { useDecidir, usePendencias, type Pendencia } from "@/lib/api/gestao";
-import { fmtDay, fmtTime } from "@/lib/troka";
-import { fmtBRL } from "@/lib/format";
+import { fmtBRL, fmtDay, fmtTime } from "@/lib/format";
 
 // RN19/RN21: o gestor do setor aprova ou recusa com um clique; o banco revalida tudo (RN16)
 export function Pendencias() {

@@ -12,7 +12,8 @@
     "db:reset": "supabase db reset",
     "db:status": "supabase status",
     "db:test": "supabase test db",
-    "db:types": "supabase gen types typescript --local --schema public > apps/web/src/lib/database.types.ts && prettier --write apps/web/src/lib/database.types.ts"
+    "db:types": "supabase gen types typescript --local --schema public > apps/web/src/lib/database.types.ts && prettier --write apps/web/src/lib/database.types.ts",
+    "functions:serve": "supabase functions serve --env-file supabase/functions/.env"
   },
   "devDependencies": {
     "supabase": "^3.0.0"

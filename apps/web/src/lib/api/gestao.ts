@@ -27,6 +27,8 @@ export interface MembroEquipe {
   categoria: Enums["categoria_profissional"];
   especialidade: string;
   confiavel: boolean;
+  conselho: string;
+  conselho_validacao: Enums["validacao_conselho"] | null;
 }
 
 // RN24: plantões em risco (RLS: só gestão do setor)

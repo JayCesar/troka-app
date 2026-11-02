@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAlertas, useResolverAlerta } from "@/lib/api/gestao";
-import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
 
 // RN24: anúncio expirado sem cobertura gera alerta de plantão em risco.
 // Resolve sozinho quando o plantão muda de dono (ex.: gestor reatribui em "Plantões do setor").

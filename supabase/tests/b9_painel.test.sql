@@ -14,7 +14,7 @@ insert into auth.users (id, email) select pg_temp.u(x), x || '@t' from unnest(ar
 insert into public.perfil (id, hospital_id, setor_id, papel, nome)
 values (pg_temp.u('a0'), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'gestor', 'G');
 insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
-select pg_temp.u(x), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', upper(x), 'medico', pg_temp.clinico(), '1', 'SP'
+select pg_temp.u(x), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', upper(x), 'medico', pg_temp.clinico(), left(gen_random_uuid()::text, 8), 'SP'
 from unnest(array['b1', 'b2', 'b3']) x;
 
 -- 2 plantões abertos futuros + 1 aberto passado (não conta); b1: plantão em 4h (anúncio vence em <6h) e em 3 dias (urgente)

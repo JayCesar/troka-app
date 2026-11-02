@@ -19,7 +19,7 @@ insert into auth.users (id, email) values
 create function pg_temp.prof(p_id uuid, p_setor uuid) returns void language sql as $$
   insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
   select p_id, s.hospital_id, s.id, 'profissional', 'T', 'medico',
-         (select id from public.especialidade where nome = 'Clínico' and categoria = 'medico'), '1', 'SP'
+         (select id from public.especialidade where nome = 'Clínico' and categoria = 'medico'), left(gen_random_uuid()::text, 8), 'SP'
   from public.setor s where s.id = p_setor $$;
 select pg_temp.prof('00000000-0000-0000-0000-0000000000a1', 'aaaaaaaa-0000-0000-0000-0000000000a1');
 select pg_temp.prof('00000000-0000-0000-0000-0000000000a2', 'aaaaaaaa-0000-0000-0000-0000000000a2');
@@ -47,7 +47,7 @@ select throws_ok(
 select throws_ok(
   $$ insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
      values ('00000000-0000-0000-0000-0000000000ff', 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', 'x', 'enfermeiro',
-             (select id from public.especialidade where nome = 'Clínico'), '1', 'SP') $$,
+             (select id from public.especialidade where nome = 'Clínico'), left(gen_random_uuid()::text, 8), 'SP') $$,
   '23503', null, 'RN01: especialidade precisa ser da categoria do profissional');
 
 -- ---------- Anônimo não vê nada ----------

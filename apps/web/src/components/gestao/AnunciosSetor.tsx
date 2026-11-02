@@ -3,8 +3,7 @@ import { Coins } from "lucide-react";
 import { toast } from "sonner";
 
 import { labelCategoria, useAnunciosSetor, useDefinirAdicional } from "@/lib/api/anuncios";
-import { fmtBRL } from "@/lib/format";
-import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { fmtBRL, fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
 
 // Anúncios em aberto do setor. O motivo aparece aqui porque a RLS libera para o gestor (RN29).
 export function AnunciosSetor() {

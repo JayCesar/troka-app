@@ -20,7 +20,9 @@ export function Equipe() {
           <li key={m.id} className="flex items-center gap-3 p-4 text-sm">
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{m.nome}</p>
-              <p className="text-xs text-muted-foreground">{m.categoria === "medico" ? "Médico" : "Enfermeiro"} · {m.especialidade}</p>
+              <p className="text-xs text-muted-foreground">{m.categoria === "medico" ? "Médico" : "Enfermeiro"} · {m.especialidade} · {m.conselho}</p>
+              {m.conselho_validacao === "nao_verificado" && <span className="chip mt-1 bg-warning/15 text-warning">Conselho não verificado (modo teste)</span>}
+              {m.conselho_validacao === "simulado" && <span className="chip mt-1 bg-secondary">Validação simulada</span>}
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
               <ShieldCheck className={`h-4 w-4 ${m.confiavel ? "text-success" : "text-muted-foreground"}`} />

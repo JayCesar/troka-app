@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnunciarRouteImport } from './routes/anunciar'
 import { Route as AssumirRouteImport } from './routes/assumir'
+import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as GestaoRouteImport } from './routes/gestao'
 import { Route as PlantoesRouteImport } from './routes/plantoes'
 
@@ -30,6 +31,11 @@ const AssumirRoute = AssumirRouteImport.update({
   path: '/assumir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
+  id: '/definir-senha',
+  path: '/definir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GestaoRoute = GestaoRouteImport.update({
   id: '/gestao',
   path: '/gestao',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
 }
@@ -60,21 +68,32 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/gestao': typeof GestaoRoute
   '/plantoes': typeof PlantoesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anunciar' | '/assumir' | '/gestao' | '/plantoes'
+  fullPaths:
+    '/' | '/anunciar' | '/assumir' | '/definir-senha' | '/gestao' | '/plantoes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anunciar' | '/assumir' | '/gestao' | '/plantoes'
-  id: '__root__' | '/' | '/anunciar' | '/assumir' | '/gestao' | '/plantoes'
+  to:
+    '/' | '/anunciar' | '/assumir' | '/definir-senha' | '/gestao' | '/plantoes'
+  id:
+    | '__root__'
+    | '/'
+    | '/anunciar'
+    | '/assumir'
+    | '/definir-senha'
+    | '/gestao'
+    | '/plantoes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnunciarRoute: typeof AnunciarRoute
   AssumirRoute: typeof AssumirRoute
+  DefinirSenhaRoute: typeof DefinirSenhaRoute
   GestaoRoute: typeof GestaoRoute
   PlantoesRoute: typeof PlantoesRoute
 }
@@ -102,6 +121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssumirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/definir-senha': {
+      id: '/definir-senha'
+      path: '/definir-senha'
+      fullPath: '/definir-senha'
+      preLoaderRoute: typeof DefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gestao': {
       id: '/gestao'
       path: '/gestao'
@@ -123,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnunciarRoute: AnunciarRoute,
   AssumirRoute: AssumirRoute,
+  DefinirSenhaRoute: DefinirSenhaRoute,
   GestaoRoute: GestaoRoute,
   PlantoesRoute: PlantoesRoute,
 }

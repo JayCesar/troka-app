@@ -19,7 +19,7 @@ insert into public.perfil (id, hospital_id, setor_id, papel, nome) values
   (pg_temp.u('c0'), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a2', 'gestor', 'Gestor A2');
 insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
 select pg_temp.u(x), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', upper(x), 'medico',
-       pg_temp.clinico(), '1', 'SP'
+       pg_temp.clinico(), left(gen_random_uuid()::text, 8), 'SP'
 from unnest(array['b1', 'b2']) x;
 
 create function pg_temp.h(e text, op text) returns bigint language sql as $$

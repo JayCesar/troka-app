@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/lib/supabase";
 import { unwrap } from "@/lib/api/plantoes";
-import { fmtDateTime } from "@/lib/troka";
+import { fmtDateTime } from "@/lib/format";
 
 interface LinhaHistorico {
   ocorrido_em: string;

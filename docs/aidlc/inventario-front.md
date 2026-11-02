@@ -20,18 +20,7 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 
 ## 2. Dado real × mock
 
-| Dado | Origem hoje | Destino |
-|---|---|---|
-| Usuários, papéis, vínculos | **banco (B1)**; o mock ainda é espelhado por e-mail para as telas | `auth.users` + `perfil` |
-| Hospitais, setores, especialidades | mock (constantes `SECTORS`, `SPECIALTIES`, `SECTOR_SPECIALTY`) | tabelas (B1) |
-| Plantões | **banco (B2)** em `/plantoes` e `/gestao`; `/assumir` e `/anunciar` ainda mock | `plantao` |
-| Anúncios | **banco (B3)** em `/plantoes`, `/anunciar`, `/gestao`; `/assumir` ainda mock | `anuncio` + `anuncio_motivo` |
-| Elegibilidade | **banco (B4)**: `app.motivos_para` + `ofertas_para_mim` | — |
-| Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
-| Histórico | **banco (B8)**: `historico` imutável + CSV | — |
-| Notificações | **banco (B4)**: `aviso` + sino no AppShell | — |
-| Login | **Supabase Auth (B1, feito)** — e-mail + senha | — |
-| Logo | `/favicon.png` provisório | asset final em `public/` |
+**Tudo vem do banco desde o B10** (store mock `troka.tsx` removido). Seed local em `supabase/seed.sql`.
 
 ## 3. RN × onde está implementada
 
@@ -40,7 +29,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN | Regra (resumo) | Status | Onde / observação |
 |---|---|---|---|
 | RN01 | Profissional ↔ hospital, setor, categoria, especialidade | **coberta** (B1) | `perfil` + FKs compostas + CHECK por papel; cadastro pela gestão vem no B10. Antes: `User`: só médico (sem enfermeiro), vários hospitais/setores (Q6 = 1 hospital) |
-| RN01b | CRM/COREN + UF validados no cadastro pelo gestor | falta | Form só tem campo CRM livre, sem UF, sem COREN, sem validação |
+| RN01b | CRM/COREN + UF validados no cadastro pelo gestor | parcial (B10) | Edge Function `cadastrar-profissional` valida antes de concluir e bloqueia se falhar; modos `desligada`/`simulada` prontos. **Falta o provedor real de consulta ao conselho** (decisão do usuário). |
 | RN02 | Papel definido pelo hospital | **coberta** (B1) | enum `papel`; escrita em `perfil` bloqueada via API. Antes: `role` fixo no seed; cadastro sempre cria "medico" |
 | RN03 | Vê só dados do próprio hospital e setor | **coberta** (B1) | RLS em `hospital`/`setor`/`perfil` via `app.meu_setor()`; cada bolt novo estende às suas tabelas. Antes: Filtros de tela (`assumir`, `gestao`); sem RLS |
 | RN30 | Isolamento entre hospitais | **coberta** (B1) | RLS via `app.meu_hospital()`; testado. Antes: Store global com todos os hospitais |
@@ -81,7 +70,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | **coberta** (B9) | `painel_do_setor` (abertos, urgentes, a vencer ≤ 6h, alertas, pendências). |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 40 · parcial 0 · falta 1 (após B9).
+**Totais (41 RNs):** coberta 40 · parcial 1 · falta 0 (após B10). Única pendência: provedor real da RN01b.
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

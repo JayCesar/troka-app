@@ -13,8 +13,7 @@ import {
   type Oferta,
   type Solicitacao,
 } from "@/lib/api/ofertas";
-import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
-import { fmtBRL } from "@/lib/format";
+import { fmtBRL, fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
 
 export const Route = createFileRoute("/assumir")({
   head: () => ({

@@ -16,7 +16,7 @@ insert into public.perfil (id, hospital_id, setor_id, papel, nome) values
   ('00000000-0000-0000-0000-00000000a2a2', 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a2', 'gestor', 'gA2');
 insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
 select v.id, 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', 'T', 'medico',
-       (select id from public.especialidade where nome = 'Clínico'), '1', 'SP'
+       (select id from public.especialidade where nome = 'Clínico'), left(gen_random_uuid()::text, 8), 'SP'
 from (values ('00000000-0000-0000-0000-0000000000a1'::uuid), ('00000000-0000-0000-0000-0000000000a3'::uuid)) v(id);
 
 -- Plantões de p1: futuro (2 dias), iniciado, começa em 5h, futuro (5 dias)

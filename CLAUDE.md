@@ -13,7 +13,8 @@
 - Antes de comando Supabase, explique em 1–2 linhas o que faz.
 - Ao fim de cada etapa, diga como conferir no Studio local (http://localhost:54323).
 - `lovable/` é só origem de referência: não alterar.
-- Validação CRM/COREN (RN01b) deve ter modo de teste sem validação, controlado por secret da Edge Function (nunca flag no front).
+- Validação CRM/COREN (RN01b): secret `CONSELHO_VALIDACAO` da Edge Function (`desligada` | `simulada` | `real`), nunca flag no front.
+- Testes de regra: pgTAP em `supabase/tests` (`npm run db:test`); toda RPC nova ganha teste.
 
 ## Economia de tokens
 - Não ler `node_modules`, `dist`, `.git`, lockfiles, assets.

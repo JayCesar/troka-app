@@ -1,6 +1,6 @@
 # Estado do AI-DLC
 
-- Fase atual: automode — B9 concluído, B10 em andamento
-- Próxima: B10 — Cadastro com validação CRM/COREN + modo de teste (RN01b)
-- Bolt atual: B10
+- Fase atual: automode — B1–B10 concluídos; aguardando usuário
+- Próxima: decisões do usuário (provedor real RN01b; Q1, Q6, Q10, Q11, Q13, Q14) → B11 (assistente IA) e/ou subida para a nuvem
+- Bolt atual: —
 - Última aprovação: B3 (2026-11-02); automode autorizado para B4–B10

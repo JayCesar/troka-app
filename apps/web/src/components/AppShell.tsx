@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Bell, CalendarCheck, HandHelping, Megaphone, ShieldCheck, LogOut } from "lucide-react";
 const LOGO_URL = "/favicon.png"; // TODO: trocar pelo logo final em public/troka-logo.png
-import { fmtDateTime, useTroka } from "@/lib/troka";
+import { fmtDateTime } from "@/lib/format";
 import { homeFor, useAuth, type Papel } from "@/lib/auth";
 import { useAvisos, useMarcarAvisosLidos } from "@/lib/api/avisos";
 
@@ -93,15 +93,3 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
   );
 }
 
-// TEMPORÁRIO: envolve telas que ainda leem o store mock (removido quando o bolt da tela chegar).
-export function MockOnly({ bolt, children }: { bolt: string; children: ReactNode }) {
-  const { user } = useTroka();
-  if (!user) {
-    return (
-      <p className="card p-5 text-sm text-muted-foreground">
-        Esta seção ainda usa dados de demonstração, que não incluem o seu usuário. Ela passa a vir do banco no {bolt}.
-      </p>
-    );
-  }
-  return <>{children}</>;
-}

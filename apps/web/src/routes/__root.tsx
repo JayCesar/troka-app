@@ -7,7 +7,6 @@ import {
   HeadContent,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { TrokaProvider } from "../lib/troka";
 import { AuthProvider } from "../lib/auth";
 import { Toaster } from "sonner";
 
@@ -80,12 +79,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <HeadContent />
-      <TrokaProvider>
-        <AuthProvider>
-          <Outlet />
-          <Toaster position="top-center" richColors />
-        </AuthProvider>
-      </TrokaProvider>
+      <AuthProvider>
+        <Outlet />
+        <Toaster position="top-center" richColors />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

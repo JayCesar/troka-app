@@ -86,3 +86,10 @@
 - Decisões automode (revisáveis) P1–P3 em `docs/aidlc/construction/b9-painel/plano.md` ("a vencer" = ≤ 6h).
 - Execução: migration `20261102195146_b9_painel.sql` (`painel_do_setor`), `b9_painel.test.sql` 6/6 (total 164/164). Front: indicadores no topo da gestão; painel mock removido.
 - Aprovação: automode.
+
+## 2026-11-03T01:10:00Z — B10 (Cadastro com validação CRM/COREN) — automode
+- Decisões automode (revisáveis) P1–P6 em `docs/aidlc/construction/b10-cadastro/plano.md`.
+- Execução: migration `20261102195503_b10_cadastro.sql` (status de validação, conselho único, UF válida, `cadastrar_profissional_interno` e `cadastro_verificar` só para service_role), Edge Function `cadastrar-profissional` (modos desligada/simulada/real), template de convite pt-BR, `enable_signup=false`, rota `/definir-senha`, remoção do store mock. `b10_cadastro.test.sql` 14/14 (total 178/178).
+- Bugs encontrados no teste ponta a ponta e corrigidos (ver plano). Fixtures antigos ajustados para conselho único.
+- Pendente de decisão do usuário: provedor real de consulta ao conselho (modo `real` bloqueia até lá).
+- Automode encerrado aqui (limite: B11 depende de Q10/Q13/Q14; nuvem só a pedido).

@@ -18,7 +18,7 @@ insert into public.perfil (id, hospital_id, setor_id, papel, nome) values
   (pg_temp.u('c0'), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a2', 'gestor', 'GA2');
 insert into public.perfil (id, hospital_id, setor_id, papel, nome, categoria, especialidade_id, conselho_numero, conselho_uf)
 select pg_temp.u(x), 'aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', 'profissional', upper(x), 'medico',
-       (select id from public.especialidade where nome = 'Clínico'), '1', 'SP'
+       (select id from public.especialidade where nome = 'Clínico'), left(gen_random_uuid()::text, 8), 'SP'
 from unnest(array['b1', 'b2']) x;
 insert into public.plantao (hospital_id, setor_id, especialidade_id, inicio, fim, profissional_id, criado_por)
 values ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-0000000000a1', (select id from public.especialidade where nome = 'Clínico'),

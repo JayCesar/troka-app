@@ -7,7 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { anuncioAtivo, useMeusPlantoes } from "@/lib/api/plantoes";
 import { CATEGORIAS, previaExpiracao, URGENCIAS, useAnunciar, type MotivoCategoria, type Urgencia } from "@/lib/api/anuncios";
-import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
 
 export const Route = createFileRoute("/anunciar")({
   validateSearch: (s: Record<string, unknown>): { plantao?: string } =>

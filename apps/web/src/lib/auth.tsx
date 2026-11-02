@@ -3,7 +3,6 @@ import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "./supabase";
 import type { Database } from "./database.types";
-import { useTroka } from "./troka";
 
 type PerfilRow = Database["public"]["Tables"]["perfil"]["Row"];
 export type Papel = Database["public"]["Enums"]["papel"];
@@ -34,7 +33,6 @@ async function fetchPerfil(userId: string): Promise<Perfil | null> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const troka = useTroka();
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
@@ -58,15 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sub.subscription.unsubscribe();
     };
   }, []);
-
-  // TEMPORÁRIO (até B2–B9): as telas ainda leem o store mock; espelha o usuário logado por e-mail.
-  const email = session?.user.email ?? null;
-  const { login: mockLogin, logout: mockLogout } = troka;
-  useEffect(() => {
-    if (email) mockLogin(email);
-    else mockLogout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [email]);
 
   const value: AuthState = {
     loading,

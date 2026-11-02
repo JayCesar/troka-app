@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
-import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { fmtBRL, fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
 import { anuncioAtivo, type Plantao } from "@/lib/api/plantoes";
-import { fmtBRL } from "@/lib/format";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   aberto: { label: "Aberto", cls: "bg-secondary text-secondary-foreground" },
