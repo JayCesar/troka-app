@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
 import { anuncioAtivo, type Plantao } from "@/lib/api/plantoes";
+import { fmtBRL } from "@/lib/format";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   aberto: { label: "Aberto", cls: "bg-secondary text-secondary-foreground" },
@@ -26,6 +27,7 @@ export function PlantaoCard({ plantao, showProfissional, children }: { plantao: 
             <span className={`chip ${status.cls}`}>{status.label}</span>
             {anuncio && <span className="chip bg-warning/15 text-warning">{anuncio.status === "pendente" ? "Troca pendente" : `Anunciado · vence ${fmtDateTime(new Date(anuncio.expira_em).getTime())}`}</span>}
             {anuncio?.urgencia === "urgente" && <span className="chip bg-destructive/15 text-destructive">Urgente</span>}
+            {anuncio?.adicional_valor && <span className="chip bg-accent text-accent-foreground">Adicional {fmtBRL(anuncio.adicional_valor)}</span>}
           </div>
           <p className="text-sm text-muted-foreground">{plantao.setor?.nome} · {plantao.hospital?.nome}</p>
           <p className="text-sm font-semibold">{fmtTime(inicio)} – {fmtTime(fim)}{fmtDay(fim) !== fmtDay(inicio) && ` (${fmtDay(fim)})`}</p>

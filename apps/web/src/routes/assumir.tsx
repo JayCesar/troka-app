@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Flame, Lock } from "lucide-react";
+import { CheckCircle2, Coins, Flame, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -14,6 +14,7 @@ import {
   type Solicitacao,
 } from "@/lib/api/ofertas";
 import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
+import { fmtBRL } from "@/lib/format";
 
 export const Route = createFileRoute("/assumir")({
   head: () => ({
@@ -83,6 +84,7 @@ function OfertaCard({ o }: { o: Oferta }) {
           <h3 className="font-bold">{o.especialidade}</h3>
           <span className={`chip ${anuncio ? "bg-warning/15 text-warning" : "bg-secondary"}`}>{anuncio ? `Troca · ${o.anunciante}` : "Plantão em aberto"}</span>
           {o.urgencia === "urgente" && <span className="chip bg-destructive/15 text-destructive"><Flame className="h-3 w-3" />Urgente</span>}
+          {o.adicional && <span className="chip bg-accent text-accent-foreground"><Coins className="h-3 w-3" />Adicional {fmtBRL(o.adicional)}</span>}
           {ok && <span className="chip bg-success/15 text-success"><CheckCircle2 className="h-3 w-3" />Você é elegível</span>}
         </div>
         <p className="text-sm font-semibold">{horario(o.inicio, o.fim)}</p>

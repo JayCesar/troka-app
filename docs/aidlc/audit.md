@@ -65,3 +65,8 @@
 - Decisões automode (revisáveis) P1–P5 em `docs/aidlc/construction/b5-aprovacao/plano.md`.
 - Execução: migration `20261102193201_b5_aprovacao.sql` (`lista_confianca`, efetivação com revalidação RN16, auto-aprovação RN19c/RN06c, RPCs aprovar/recusar troca e candidatura, pendências e equipe), seed com lista de confiança, `b5_aprovacao.test.sql` 27/27 (total 111/111). Front: "Aguardando aprovação" real e "Equipe do setor" com lista de confiança.
 - Aprovação: automode (commit após testes + build + API verdes).
+
+## 2026-11-02T23:45:00Z — B6 (Adicional) — automode
+- Decisões automode (revisáveis) P1–P5 em `docs/aidlc/construction/b6-adicional/plano.md`.
+- Execução: migration `20261102193949_b6_adicional.sql` (colunas de adicional, RPC `definir_adicional`, ofertas/pendências com adicional), seed com R$ 250 no anúncio da Juliana, `b6_adicional.test.sql` 12/12 (total 123/123). Front: editor de adicional na gestão, chips em /assumir, /plantoes e pendências.
+- Aprovação: automode.

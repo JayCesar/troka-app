@@ -68,9 +68,9 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN20 | Dono muda só após aprovação | **coberta** (B5) | dono só muda em `efetivar_troca`/`efetivar_candidatura`. |
 | RN20b | Sem cancelamento após aprovação | **coberta** (B5) | não há RPC de desfazer; desistir/recusar exigem pendente (testado). |
 | RN21 | Só gestor do setor aprova | **coberta** (B5) | `app.anuncio_do_meu_setor`/`candidatura_do_meu_setor`. |
-| RN17 | Só gestor oferece adicional | falta | Bônus vem de regra do hospital, automático |
-| RN17b | Valor fixo por anúncio, opcional | falta | Bônus por urgência |
-| RN18 | Adicional visível antes de assumir e no histórico | parcial | Exibido em `/assumir` e `/anunciar`; não vai para histórico |
+| RN17 | Só gestor oferece adicional | **coberta** (B6) | RPC `definir_adicional` só para gestor do setor. |
+| RN17b | Valor fixo por anúncio, opcional | **coberta** (B6) | `numeric(10,2) > 0`, opcional, por anúncio. |
+| RN18 | Adicional visível antes de assumir e no histórico | **coberta** (B6) | em `ofertas_para_mim`/pendências; fica no anúncio após conclusão (histórico de alterações no B8). |
 | RN22 | Anunciante cancela antes da aprovação | falta | — |
 | RN22b | Quem assumiu desiste antes da aprovação | **coberta** (B4) | RPC `desistir_anuncio` (+ `desistir_candidatura`). |
 | RN23 | Anúncio expira sem interessado | falta | — |
@@ -81,7 +81,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 30 · parcial 5 · falta 6 (após B5).
+**Totais (41 RNs):** coberta 33 · parcial 4 · falta 4 (após B6).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

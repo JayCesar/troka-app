@@ -1,4 +1,9 @@
-import { labelCategoria, useAnunciosSetor } from "@/lib/api/anuncios";
+import { useState } from "react";
+import { Coins } from "lucide-react";
+import { toast } from "sonner";
+
+import { labelCategoria, useAnunciosSetor, useDefinirAdicional } from "@/lib/api/anuncios";
+import { fmtBRL } from "@/lib/format";
 import { fmtDateTime, fmtDay, fmtTime } from "@/lib/troka";
 
 // Anúncios em aberto do setor. O motivo aparece aqui porque a RLS libera para o gestor (RN29).
@@ -21,6 +26,7 @@ export function AnunciosSetor() {
               {a.status === "pendente" && <span className="chip bg-primary/15 text-primary">Assumido por {a.assumido?.nome} · aguardando aprovação</span>}
             </div>
             <p className="text-muted-foreground">Anunciado por {a.anunciante?.nome} · vence {fmtDateTime(new Date(a.expira_em).getTime())}</p>
+            <AdicionalEditor id={a.id} valor={a.adicional_valor} />
             <p>
               <span className="font-semibold">Motivo: </span>
               {a.anuncio_motivo ? `${labelCategoria(a.anuncio_motivo.categoria)}${a.anuncio_motivo.texto ? ` — ${a.anuncio_motivo.texto}` : ""}` : <span className="text-muted-foreground">não informado</span>}
@@ -29,5 +35,38 @@ export function AnunciosSetor() {
         );
       })}
     </section>
+  );
+}
+
+// RN17/RN17b: valor fixo em reais, opcional, definido pelo gestor enquanto o anúncio está aberto
+function AdicionalEditor({ id, valor }: { id: string; valor: number | null }) {
+  const definir = useDefinirAdicional();
+  const [editando, setEditando] = useState(false);
+  const [texto, setTexto] = useState(valor ? String(valor).replace(".", ",") : "");
+
+  const salvar = (v: number | null) =>
+    definir.mutate(
+      { id, valor: v },
+      { onSuccess: () => { setEditando(false); toast.success(v ? `Adicional de ${fmtBRL(v)} oferecido.` : "Adicional removido."); }, onError: (e) => toast.error(e.message) },
+    );
+
+  if (!editando) {
+    return (
+      <div className="flex items-center gap-2 py-1">
+        <Coins className="h-4 w-4 text-muted-foreground" />
+        <span>{valor ? <>Adicional <b>{fmtBRL(valor)}</b></> : <span className="text-muted-foreground">Sem adicional</span>}</span>
+        <button className="ml-auto text-xs font-semibold text-primary" onClick={() => setEditando(true)}>{valor ? "Alterar" : "Oferecer adicional"}</button>
+      </div>
+    );
+  }
+  const numero = Number(texto.replace(/\./g, "").replace(",", "."));
+  return (
+    <form className="flex items-center gap-2 py-1" onSubmit={(e) => { e.preventDefault(); if (numero > 0) salvar(numero); }}>
+      <span className="text-sm font-semibold">R$</span>
+      <input className="field min-h-10 flex-1" inputMode="decimal" placeholder="0,00" autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} />
+      <button className="btn btn-primary min-h-10 text-sm" disabled={!(numero > 0) || definir.isPending}>Salvar</button>
+      {valor && <button type="button" className="btn btn-outline min-h-10 text-sm" disabled={definir.isPending} onClick={() => salvar(null)}>Remover</button>}
+      <button type="button" className="text-xs text-muted-foreground" onClick={() => setEditando(false)}>Cancelar</button>
+    </form>
   );
 }

@@ -25,7 +25,7 @@ export function previaExpiracao(urgencia: Urgencia, inicioPlantao: string): Date
   return new Date(Math.min(Date.now() + horas * 3_600_000, new Date(inicioPlantao).getTime()));
 }
 
-export type AnuncioSetor = Pick<Database["public"]["Tables"]["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em" | "criado_em"> & {
+export type AnuncioSetor = Pick<Database["public"]["Tables"]["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em" | "criado_em" | "adicional_valor"> & {
   anuncio_motivo: { categoria: MotivoCategoria; texto: string | null } | null; // null para quem não pode ver (RN29)
   anunciante: { nome: string } | null;
   assumido: { nome: string } | null;
@@ -58,6 +58,21 @@ export function useAnunciar() {
   });
 }
 
+// RN17: só o gestor do setor define; vale enquanto o anúncio está aberto (B6/P1)
+export function useDefinirAdicional() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, valor }: { id: string; valor: number | null }) => {
+      const { error } = await supabase.rpc("definir_adicional", { p_anuncio_id: id, p_valor: valor as number });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["anuncios"] });
+      void qc.invalidateQueries({ queryKey: ["plantoes"] });
+    },
+  });
+}
+
 // Anúncios do setor (RLS). O motivo só vem preenchido para gestor/anunciante (RN29); para os demais vem null.
 export function useAnunciosSetor() {
   return useQuery({
@@ -67,7 +82,7 @@ export function useAnunciosSetor() {
         await supabase
           .from("anuncio")
           .select(
-            "id, status, urgencia, expira_em, criado_em, anuncio_motivo(categoria, texto), anunciante:perfil!anuncio_anunciante_id_fkey(nome), assumido:perfil!anuncio_assumido_por_fkey(nome), plantao(inicio, fim, especialidade(nome))",
+            "id, status, urgencia, expira_em, criado_em, adicional_valor, anuncio_motivo(categoria, texto), anunciante:perfil!anuncio_anunciante_id_fkey(nome), assumido:perfil!anuncio_assumido_por_fkey(nome), plantao(inicio, fim, especialidade(nome))",
           )
           // abertos no prazo (os pendentes aparecem em "Aguardando aprovação")
           .eq("status", "aberto")

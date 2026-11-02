@@ -143,3 +143,10 @@ insert into public.lista_confianca (profissional_id, setor_id, incluido_por)
 select p.id, p.setor_id, (select g.id from public.perfil g where g.setor_id = p.setor_id and g.papel = 'gestor' limit 1)
 from public.perfil p
 where p.id in ('40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000004', '40000000-0000-0000-0000-000000000006');
+
+-- ---------------------------------------------------------------------------
+-- B6: Ana oferece R$ 250,00 no anúncio da Juliana (Clínica Médica VN)
+-- ---------------------------------------------------------------------------
+select pg_temp.como('30000000-0000-0000-0000-000000000001');
+select public.definir_adicional((select id from public.anuncio where anunciante_id = '40000000-0000-0000-0000-000000000004'), 250);
+select set_config('request.jwt.claims', '', true);

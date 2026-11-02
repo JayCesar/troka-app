@@ -5,6 +5,9 @@ export type Database = {
     Tables: {
       anuncio: {
         Row: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;
@@ -18,6 +21,9 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          adicional_definido_em?: string | null;
+          adicional_definido_por?: string | null;
+          adicional_valor?: number | null;
           anunciante_id: string;
           assumido_em?: string | null;
           assumido_por?: string | null;
@@ -30,6 +36,9 @@ export type Database = {
           urgencia: Database["public"]["Enums"]["urgencia"];
         };
         Update: {
+          adicional_definido_em?: string | null;
+          adicional_definido_por?: string | null;
+          adicional_valor?: number | null;
           anunciante_id?: string;
           assumido_em?: string | null;
           assumido_por?: string | null;
@@ -42,6 +51,13 @@ export type Database = {
           urgencia?: Database["public"]["Enums"]["urgencia"];
         };
         Relationships: [
+          {
+            foreignKeyName: "anuncio_adicional_definido_por_fkey";
+            columns: ["adicional_definido_por"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "anuncio_anunciante_id_fkey";
             columns: ["anunciante_id"];
@@ -437,6 +453,9 @@ export type Database = {
           p_urgencia: Database["public"]["Enums"]["urgencia"];
         };
         Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;
@@ -475,6 +494,9 @@ export type Database = {
       aprovar_troca: {
         Args: { p_anuncio_id: string };
         Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;
@@ -496,6 +518,9 @@ export type Database = {
       assumir_anuncio: {
         Args: { p_anuncio_id: string };
         Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;
@@ -558,6 +583,30 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      definir_adicional: {
+        Args: { p_anuncio_id: string; p_valor: number };
+        Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       definir_confianca: {
         Args: { p_confiavel: boolean; p_profissional_id: string };
         Returns: undefined;
@@ -565,6 +614,9 @@ export type Database = {
       desistir_anuncio: {
         Args: { p_anuncio_id: string };
         Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;
@@ -654,6 +706,7 @@ export type Database = {
       ofertas_para_mim: {
         Args: Record<PropertyKey, never>;
         Returns: {
+          adicional: number;
           anunciante: string;
           anuncio_id: string;
           especialidade: string;
@@ -670,6 +723,7 @@ export type Database = {
       pendencias_do_setor: {
         Args: Record<PropertyKey, never>;
         Returns: {
+          adicional: number;
           anunciante: string;
           especialidade: string;
           fim: string;
@@ -703,6 +757,9 @@ export type Database = {
       recusar_troca: {
         Args: { p_anuncio_id: string };
         Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
           anunciante_id: string;
           assumido_em: string | null;
           assumido_por: string | null;

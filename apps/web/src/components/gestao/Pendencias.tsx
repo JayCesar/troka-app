@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 import { useDecidir, usePendencias, type Pendencia } from "@/lib/api/gestao";
 import { fmtDay, fmtTime } from "@/lib/troka";
+import { fmtBRL } from "@/lib/format";
 
 // RN19/RN21: o gestor do setor aprova ou recusa com um clique; o banco revalida tudo (RN16)
 export function Pendencias() {
@@ -32,6 +33,7 @@ function PendenciaCard({ p }: { p: Pendencia }) {
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-bold">{p.especialidade} · {fmtDay(inicio)} {fmtTime(inicio)}–{fmtTime(new Date(p.fim).getTime())}</p>
           {p.urgencia === "urgente" && <span className="chip bg-destructive/15 text-destructive">Urgente</span>}
+          {p.adicional && <span className="chip bg-accent text-accent-foreground">Adicional {fmtBRL(p.adicional)}</span>}
         </div>
         {p.tipo === "troca" ? (
           <p className="text-muted-foreground">{p.anunciante} → <span className="font-semibold text-foreground">{p.solicitante}</span></p>

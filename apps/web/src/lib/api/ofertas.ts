@@ -15,6 +15,7 @@ export interface Oferta {
   urgencia: Database["public"]["Enums"]["urgencia"] | null;
   expira_em: string | null;
   anunciante: string | null;
+  adicional: number | null; // RN18: visível antes de assumir
   motivos: string[]; // vazio = elegível (RN12–RN15)
   ja_candidatei: boolean;
 }

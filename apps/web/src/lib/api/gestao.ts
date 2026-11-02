@@ -17,6 +17,7 @@ export interface Pendencia {
   solicitante: string;
   anunciante: string | null;
   urgencia: Enums["urgencia"] | null;
+  adicional: number | null;
   solicitado_em: string;
   motivos: string[]; // revalidação prévia (RN16): vazio = aprovação deve passar
 }

@@ -4,7 +4,7 @@ import { supabase } from "../supabase";
 import type { Database } from "../database.types";
 
 type Tables = Database["public"]["Tables"];
-export type AnuncioResumo = Pick<Tables["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em">;
+export type AnuncioResumo = Pick<Tables["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em" | "adicional_valor">;
 export type Plantao = Tables["plantao"]["Row"] & {
   anuncio: AnuncioResumo[];
   especialidade: { nome: string } | null;
@@ -22,7 +22,7 @@ export interface PlantaoInput {
   profissionalId: string | null;
 }
 
-const SELECT = "*, anuncio(id, status, urgencia, expira_em), especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome), setor(nome), hospital(nome)";
+const SELECT = "*, anuncio(id, status, urgencia, expira_em, adicional_valor), especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome), setor(nome), hospital(nome)";
 
 // Anúncio "em aberto" (RN08 / decisão B3/P1): pendente, ou aberto ainda no prazo. Espelho da regra do banco, só para exibição.
 export function anuncioAtivo(p: Plantao): AnuncioResumo | null {
