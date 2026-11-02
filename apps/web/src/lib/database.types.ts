@@ -6,6 +6,8 @@ export type Database = {
       anuncio: {
         Row: {
           anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
           atualizado_em: string;
           criado_em: string;
           expira_em: string;
@@ -17,6 +19,8 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           anunciante_id: string;
+          assumido_em?: string | null;
+          assumido_por?: string | null;
           atualizado_em?: string;
           criado_em?: string;
           expira_em: string;
@@ -27,6 +31,8 @@ export type Database = {
         };
         Update: {
           anunciante_id?: string;
+          assumido_em?: string | null;
+          assumido_por?: string | null;
           atualizado_em?: string;
           criado_em?: string;
           expira_em?: string;
@@ -39,6 +45,13 @@ export type Database = {
           {
             foreignKeyName: "anuncio_anunciante_id_fkey";
             columns: ["anunciante_id"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "anuncio_assumido_por_fkey";
+            columns: ["assumido_por"];
             isOneToOne: false;
             referencedRelation: "perfil";
             referencedColumns: ["id"];
@@ -75,6 +88,85 @@ export type Database = {
             columns: ["anuncio_id"];
             isOneToOne: true;
             referencedRelation: "anuncio";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      aviso: {
+        Row: {
+          criado_em: string;
+          id: string;
+          lido_em: string | null;
+          link: string | null;
+          perfil_id: string;
+          texto: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          criado_em?: string;
+          id?: string;
+          lido_em?: string | null;
+          link?: string | null;
+          perfil_id: string;
+          texto: string;
+        };
+        Update: {
+          criado_em?: string;
+          id?: string;
+          lido_em?: string | null;
+          link?: string | null;
+          perfil_id?: string;
+          texto?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "aviso_perfil_id_fkey";
+            columns: ["perfil_id"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      candidatura: {
+        Row: {
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          profissional_id: string;
+          status: Database["public"]["Enums"]["status_candidatura"];
+        };
+        ComputedFields: never;
+        Insert: {
+          atualizado_em?: string;
+          criado_em?: string;
+          id?: string;
+          plantao_id: string;
+          profissional_id: string;
+          status?: Database["public"]["Enums"]["status_candidatura"];
+        };
+        Update: {
+          atualizado_em?: string;
+          criado_em?: string;
+          id?: string;
+          plantao_id?: string;
+          profissional_id?: string;
+          status?: Database["public"]["Enums"]["status_candidatura"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_plantao_id_fkey";
+            columns: ["plantao_id"];
+            isOneToOne: false;
+            referencedRelation: "plantao";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "candidatura_profissional_id_fkey";
+            columns: ["profissional_id"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
             referencedColumns: ["id"];
           },
         ];
@@ -302,6 +394,8 @@ export type Database = {
         };
         Returns: {
           anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
           atualizado_em: string;
           criado_em: string;
           expira_em: string;
@@ -313,6 +407,44 @@ export type Database = {
         SetofOptions: {
           from: "*";
           to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      assumir_anuncio: {
+        Args: { p_anuncio_id: string };
+        Returns: {
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      candidatar: {
+        Args: { p_plantao_id: string };
+        Returns: {
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          profissional_id: string;
+          status: Database["public"]["Enums"]["status_candidatura"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "candidatura";
           isOneToOne: true;
           isSetofReturn: false;
         };
@@ -340,6 +472,44 @@ export type Database = {
         SetofOptions: {
           from: "*";
           to: "plantao";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      desistir_anuncio: {
+        Args: { p_anuncio_id: string };
+        Returns: {
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      desistir_candidatura: {
+        Args: { p_candidatura_id: string };
+        Returns: {
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          profissional_id: string;
+          status: Database["public"]["Enums"]["status_candidatura"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "candidatura";
           isOneToOne: true;
           isSetofReturn: false;
         };
@@ -372,6 +542,35 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      marcar_avisos_lidos: { Args: Record<PropertyKey, never>; Returns: undefined };
+      minhas_solicitacoes: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          anunciante: string;
+          especialidade: string;
+          fim: string;
+          id: string;
+          inicio: string;
+          plantao_id: string;
+          tipo: string;
+        }[];
+      };
+      ofertas_para_mim: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          anunciante: string;
+          anuncio_id: string;
+          especialidade: string;
+          expira_em: string;
+          fim: string;
+          inicio: string;
+          ja_candidatei: boolean;
+          motivos: string[];
+          plantao_id: string;
+          tipo: string;
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        }[];
+      };
       remover_plantao: { Args: { p_id: string }; Returns: undefined };
     };
     Enums: {
@@ -379,6 +578,7 @@ export type Database = {
       motivo_categoria: "saude" | "pessoal" | "outro";
       papel: "profissional" | "gestor";
       status_anuncio: "aberto" | "pendente" | "aprovado" | "recusado" | "cancelado" | "expirado";
+      status_candidatura: "pendente" | "aprovada" | "recusada" | "desistida" | "cancelada";
       urgencia: "normal" | "urgente";
     };
     CompositeTypes: {
@@ -495,6 +695,7 @@ export const Constants = {
       motivo_categoria: ["saude", "pessoal", "outro"],
       papel: ["profissional", "gestor"],
       status_anuncio: ["aberto", "pendente", "aprovado", "recusado", "cancelado", "expirado"],
+      status_candidatura: ["pendente", "aprovada", "recusada", "desistida", "cancelada"],
       urgencia: ["normal", "urgente"],
     },
   },

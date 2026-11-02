@@ -118,3 +118,19 @@ end $$;
 select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000004', 1, 'normal', 'pessoal', 'Casamento da minha irmã'); -- Juliana (noturno, dia 5)
 select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000003', 0, 'urgente', 'saude', 'Cirurgia marcada');        -- Rafael (PS, amanhã)
 select pg_temp.anunciar_como('40000000-0000-0000-0000-000000000005', 0, 'normal');                                       -- Pedro (SC UTI), sem motivo
+
+-- ---------------------------------------------------------------------------
+-- B4: uma troca pendente e uma candidatura, para o B5 ter o que aprovar.
+-- ---------------------------------------------------------------------------
+create function pg_temp.como(p uuid) returns void language sql as $$
+  select set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true) $$;
+
+-- Marina assume o anúncio urgente do Rafael (PS Vila Nova)
+select pg_temp.como('40000000-0000-0000-0000-000000000006');
+select public.assumir_anuncio((select a.id from public.anuncio a where a.anunciante_id = '40000000-0000-0000-0000-000000000003'));
+-- Carlos se candidata ao plantão Clínico aberto do dia 8 (Clínica Médica Vila Nova)
+select pg_temp.como('40000000-0000-0000-0000-000000000001');
+select public.candidatar((select id from public.plantao
+                          where setor_id = '20000000-0000-0000-0000-000000000013' and profissional_id is null
+                          order by inicio desc limit 1));
+select set_config('request.jwt.claims', '', true);

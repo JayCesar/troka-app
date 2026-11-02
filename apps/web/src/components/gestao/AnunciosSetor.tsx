@@ -18,7 +18,7 @@ export function AnunciosSetor() {
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-bold">{a.plantao?.especialidade?.nome} · {fmtDay(inicio)} {fmtTime(inicio)}</p>
               {a.urgencia === "urgente" && <span className="chip bg-destructive/15 text-destructive">Urgente</span>}
-              {a.status === "pendente" && <span className="chip bg-primary/15 text-primary">Troca pendente</span>}
+              {a.status === "pendente" && <span className="chip bg-primary/15 text-primary">Assumido por {a.assumido?.nome} · aguardando aprovação</span>}
             </div>
             <p className="text-muted-foreground">Anunciado por {a.anunciante?.nome} · vence {fmtDateTime(new Date(a.expira_em).getTime())}</p>
             <p>

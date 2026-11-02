@@ -55,3 +55,8 @@
 - Entrada do usuário: "pode comitar e assumir o automode".
 - Decisão: seguir B4→B10 sem parar a cada fase; perguntas de plano resolvidas pela opção recomendada e registradas como "decidido em automode (revisável)"; um commit por bolt após `db:test` + build + checagem via API verdes.
 - Limites: parar antes do B11 (Q10/Q13/Q14 em aberto) e de qualquer comando de nuvem; parar se surgir decisão sem opção claramente recomendada ou que contrarie uma RN.
+
+## 2026-11-02T22:40:00Z — B4 (Elegibilidade, candidatura, assumir, desistir) — automode
+- Decisões automode (revisáveis) P1–P6 em `docs/aidlc/construction/b4-elegibilidade/plano.md`.
+- Execução: migration `20261102192424_b4_elegibilidade.sql` (assumidor no anúncio, `candidatura`, `aviso`, RN14 com pendências, RPCs assumir/desistir/candidatar/ofertas/solicitações, RN11 no `anunciar`), seed com troca pendente + candidatura, `b4_elegibilidade.test.sql` 26/26 (total 84/84). Front: `/assumir` real, sino de avisos real.
+- Aprovação: automode (commit após testes + build + API verdes).

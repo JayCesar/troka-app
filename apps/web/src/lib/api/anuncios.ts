@@ -28,6 +28,7 @@ export function previaExpiracao(urgencia: Urgencia, inicioPlantao: string): Date
 export type AnuncioSetor = Pick<Database["public"]["Tables"]["anuncio"]["Row"], "id" | "status" | "urgencia" | "expira_em" | "criado_em"> & {
   anuncio_motivo: { categoria: MotivoCategoria; texto: string | null } | null; // null para quem não pode ver (RN29)
   anunciante: { nome: string } | null;
+  assumido: { nome: string } | null;
   plantao: { inicio: string; fim: string; especialidade: { nome: string } | null } | null;
 };
 
@@ -66,7 +67,7 @@ export function useAnunciosSetor() {
         await supabase
           .from("anuncio")
           .select(
-            "id, status, urgencia, expira_em, criado_em, anuncio_motivo(categoria, texto), anunciante:perfil!anuncio_anunciante_id_fkey(nome), plantao(inicio, fim, especialidade(nome))",
+            "id, status, urgencia, expira_em, criado_em, anuncio_motivo(categoria, texto), anunciante:perfil!anuncio_anunciante_id_fkey(nome), assumido:perfil!anuncio_assumido_por_fkey(nome), plantao(inicio, fim, especialidade(nome))",
           )
           // "em aberto" efetivo (B3/P1): pendente, ou aberto ainda no prazo
           .or(`status.eq.pendente,and(status.eq.aberto,expira_em.gt.${new Date().toISOString()})`)

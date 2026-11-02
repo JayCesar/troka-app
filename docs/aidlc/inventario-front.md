@@ -26,10 +26,10 @@ Telas de referência visual: `lovable/telas/{login,2-plantoes,3-assumir,4-anunci
 | Hospitais, setores, especialidades | mock (constantes `SECTORS`, `SPECIALTIES`, `SECTOR_SPECIALTY`) | tabelas (B1) |
 | Plantões | **banco (B2)** em `/plantoes` e `/gestao`; `/assumir` e `/anunciar` ainda mock | `plantao` |
 | Anúncios | **banco (B3)** em `/plantoes`, `/anunciar`, `/gestao`; `/assumir` ainda mock | `anuncio` + `anuncio_motivo` |
-| Elegibilidade | `checkEligibility()` no front | função SQL `elegivel()` (B4) |
+| Elegibilidade | **banco (B4)**: `app.motivos_para` + `ofertas_para_mim` | — |
 | Regras por hospital (`minRestHours`, `weeklyLimitHours`, `autoApprove`, `bonus`) | mock | **descartar**: RN fixa 11h; sem limite semanal; auto-aprovação via lista de confiança; adicional por anúncio |
 | Histórico | mock (`audit`), mutável | `historico` append-only via trigger (B8) |
-| Notificações | mock (`notices`) | tabela/realtime (B4/B5) |
+| Notificações | **banco (B4)**: `aviso` + sino no AppShell | — |
 | Login | **Supabase Auth (B1, feito)** — e-mail + senha | — |
 | Logo | `/favicon.png` provisório | asset final em `public/` |
 
@@ -48,19 +48,19 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN05 | Só gestor do setor cria/edita/remove plantão | **coberta** (B2) | RPCs `criar/editar/remover_plantao` (setor do perfil, só antes do início); CRUD em `/gestao`. Antes: Não há tela nem ação de CRUD de plantão |
 | RN06 | Plantão aberto ou atribuído | **coberta** (B2) | coluna gerada `status`. Antes: Status `aberto/confirmado/anuncio/pendente` mistura plantão e anúncio |
 | RN06b | Troca só via anúncio | **coberta** (B3) | não existe RPC de troca direta; `anunciar` é o único caminho. Antes: Anúncio existe |
-| RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | falta | `takeShift` atribui direto, sem aprovação |
+| RN06c | Plantão aberto: candidatura + aprovação do gestor, ou automática p/ lista de confiança | parcial (B4) | candidatura + desistência no banco; aprovação/auto-aprovação no B5. |
 | RN07 | Só o dono anuncia, antes do início | **coberta** (B3) | RPC `anunciar`. Antes: Lista só plantões do usuário; não checa início |
 | RN08 | Máx. 1 anúncio aberto por plantão | **coberta** (B3) | índice único parcial (aberto+pendente). Antes: Implícito (plantão anunciado sai da lista); sem garantia |
 | RN09 | Urgência obrigatória, motivo opcional | **coberta** (B3) | Antes: Motivo obrigatório; 3 urgências |
 | RN09b | Motivo = categoria (Saúde/Pessoal/Outro) + texto opcional | **coberta** (B3) | `anuncio_motivo`, texto ≤ 500. Antes: Lista fixa de 5 motivos, sem texto |
 | RN09c | Urgência Normal / Urgente | **coberta** (B3) | enum `urgencia`. Antes: "Hoje / Até 3 dias / Mais de 3 dias" |
 | RN10 | Prazo 24h/48h ou início, o que vier primeiro | **coberta** (B3) | `expira_em` calculado na RPC. Antes: Sem prazo |
-| RN11 | Só elegíveis são avisados | parcial | `publish` notifica `eligibleDoctors` (só front) |
-| RN12 | Mesmo hospital e setor | parcial | `checkEligibility` |
-| RN12b | Mesma categoria | falta | Não há categoria |
-| RN13 | Especialidade idêntica | parcial | `checkEligibility` (via setor→especialidade) |
-| RN14 | Sem sobreposição + 11h de descanso, incluindo trocas | parcial | **banco (B2)**: `app.motivos_inelegibilidade` + trigger em toda atribuição; falta aplicar ao assumir (B4). Antes: `checkEligibility` (11h configurável por hospital + limite semanal extra, fora das RN) |
-| RN15 | Ninguém assume o próprio plantão | parcial | Filtra `requesterId !== user`; não revalida |
+| RN11 | Só elegíveis são avisados | **coberta** (B4) | `anunciar` avisa só elegíveis (`aviso`). |
+| RN12 | Mesmo hospital e setor | **coberta** (B4) | `app.motivos_para`. |
+| RN12b | Mesma categoria | **coberta** (B4) | especialidade pertence a uma categoria (FK composta). |
+| RN13 | Especialidade idêntica | **coberta** (B4) | `app.motivos_para`. |
+| RN14 | Sem sobreposição + 11h de descanso, incluindo trocas | **coberta** (B4) | inclui compromissos pendentes (P2). |
+| RN15 | Ninguém assume o próprio plantão | **coberta** (B4) | `app.motivos_para`. |
 | RN16 | Revalidar elegibilidade na aprovação | falta | `decide` não revalida |
 | RN19 | Coordenação aprova/recusa com um clique | parcial | `decide` em `/gestao` |
 | RN19b | Lista de confiança por setor | falta | — |
@@ -72,7 +72,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN17b | Valor fixo por anúncio, opcional | falta | Bônus por urgência |
 | RN18 | Adicional visível antes de assumir e no histórico | parcial | Exibido em `/assumir` e `/anunciar`; não vai para histórico |
 | RN22 | Anunciante cancela antes da aprovação | falta | — |
-| RN22b | Quem assumiu desiste antes da aprovação | falta | — |
+| RN22b | Quem assumiu desiste antes da aprovação | **coberta** (B4) | RPC `desistir_anuncio` (+ `desistir_candidatura`). |
 | RN23 | Anúncio expira sem interessado | falta | — |
 | RN24 | Expirado gera alerta de plantão em risco | parcial | "Alertas" = plantão aberto sem elegível (critério diferente) |
 | RN25 | Toda mudança registrada | parcial | `log()` em parte das ações, no front |
@@ -81,7 +81,7 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 15 · parcial 13 · falta 13 (após B3).
+**Totais (41 RNs):** coberta 22 · parcial 9 · falta 10 (após B4).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

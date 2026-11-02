@@ -4,6 +4,7 @@ import { Bell, CalendarCheck, HandHelping, Megaphone, ShieldCheck, LogOut } from
 const LOGO_URL = "/favicon.png"; // TODO: trocar pelo logo final em public/troka-logo.png
 import { fmtDateTime, useTroka } from "@/lib/troka";
 import { homeFor, useAuth, type Papel } from "@/lib/auth";
+import { useAvisos, useMarcarAvisosLidos } from "@/lib/api/avisos";
 
 export function Logo({ size = 36 }: { size?: number }) {
   return <img src={LOGO_URL} alt="TroKa" width={size} height={size} className="rounded-xl" />;
@@ -11,7 +12,8 @@ export function Logo({ size = 36 }: { size?: number }) {
 
 export function AppShell({ title, role, children }: { title: string; role?: Papel; children: ReactNode }) {
   const { loading, session, perfil, signOut } = useAuth();
-  const { user, state, markRead } = useTroka();
+  const avisos = useAvisos();
+  const marcarLidos = useMarcarAvisosLidos();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -34,8 +36,8 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
     );
   }
 
-  const mine = user ? state.notices.filter((n) => n.userId === user.id) : [];
-  const unread = mine.filter((n) => !n.read).length;
+  const mine = avisos.data ?? [];
+  const unread = mine.filter((n) => !n.lido_em).length;
   const tabs = perfil.papel === "gestor"
     ? [{ to: "/gestao" as const, label: "Gestão", icon: ShieldCheck }]
     : [
@@ -53,7 +55,7 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
             <p className="truncate text-xs opacity-70">{perfil.nome} · {perfil.setor?.nome} · {perfil.hospital?.nome}</p>
             <h1 className="truncate text-lg font-bold">{title}</h1>
           </div>
-          <button aria-label="Notificações" onClick={() => { setOpen(!open); if (!open) setTimeout(markRead, 1500); }} className="relative grid h-11 w-11 place-items-center rounded-full hover:bg-navy-foreground/10">
+          <button aria-label="Notificações" onClick={() => { setOpen(!open); if (!open && unread > 0) setTimeout(() => marcarLidos.mutate(), 1500); }} className="relative grid h-11 w-11 place-items-center rounded-full hover:bg-navy-foreground/10">
             <Bell className="h-5 w-5" />
             {unread > 0 && <span className="absolute right-1.5 top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">{unread}</span>}
           </button>
@@ -66,10 +68,10 @@ export function AppShell({ title, role, children }: { title: string; role?: Pape
             <div className="card max-h-80 overflow-auto p-2 text-foreground">
               {mine.length === 0 && <p className="p-3 text-sm text-muted-foreground">Nenhuma notificação.</p>}
               {mine.map((n) => (
-                <div key={n.id} className="flex gap-3 rounded-lg p-3 text-sm">
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? "bg-border" : "bg-primary"}`} />
-                  <div><p className="font-medium">{n.text}</p><p className="text-xs text-muted-foreground">{fmtDateTime(n.at)}</p></div>
-                </div>
+                <button key={n.id} type="button" onClick={() => { setOpen(false); if (n.link) navigate({ to: n.link }); }} className="flex w-full gap-3 rounded-lg p-3 text-left text-sm hover:bg-accent">
+                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.lido_em ? "bg-border" : "bg-primary"}`} />
+                  <div><p className="font-medium">{n.texto}</p><p className="text-xs text-muted-foreground">{fmtDateTime(new Date(n.criado_em).getTime())}</p></div>
+                </button>
               ))}
             </div>
           </div>
