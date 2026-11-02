@@ -6,6 +6,7 @@ import { AppShell, MockOnly } from "@/components/AppShell";
 import { PlantoesSetor } from "@/components/gestao/PlantoesSetor";
 import { AnunciosSetor } from "@/components/gestao/AnunciosSetor";
 import { Pendencias } from "@/components/gestao/Pendencias";
+import { Alertas } from "@/components/gestao/Alertas";
 import { Equipe } from "@/components/gestao/Equipe";
 import { eligibleDoctors, fmtDateTime, fmtDay, fmtTime, SECTORS, SPECIALTIES, useTroka, type Sector, type Specialty } from "@/lib/troka";
 
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/gestao")({
 function Page() {
   return (
     <div className="space-y-8">
+      <Alertas />
       <Pendencias />
       <AnunciosSetor />
       <PlantoesSetor />

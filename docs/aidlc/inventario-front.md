@@ -71,17 +71,17 @@ Legenda: **coberta** = implementada no banco; **parcial** = existe só no front 
 | RN17 | Só gestor oferece adicional | **coberta** (B6) | RPC `definir_adicional` só para gestor do setor. |
 | RN17b | Valor fixo por anúncio, opcional | **coberta** (B6) | `numeric(10,2) > 0`, opcional, por anúncio. |
 | RN18 | Adicional visível antes de assumir e no histórico | **coberta** (B6) | em `ofertas_para_mim`/pendências; fica no anúncio após conclusão (histórico de alterações no B8). |
-| RN22 | Anunciante cancela antes da aprovação | falta | — |
+| RN22 | Anunciante cancela antes da aprovação | **coberta** (B7) | RPC `cancelar_anuncio` (aberto ou pendente). |
 | RN22b | Quem assumiu desiste antes da aprovação | **coberta** (B4) | RPC `desistir_anuncio` (+ `desistir_candidatura`). |
-| RN23 | Anúncio expira sem interessado | falta | — |
-| RN24 | Expirado gera alerta de plantão em risco | parcial | "Alertas" = plantão aberto sem elegível (critério diferente) |
+| RN23 | Anúncio expira sem interessado | **coberta** (B7) | job pg_cron `troka-expirar-vencidos` a cada minuto + expiração preguiçosa. |
+| RN24 | Expirado gera alerta de plantão em risco | **coberta** (B7) | trigger cria `alerta` em toda expiração; seção "Plantões em risco" na gestão. |
 | RN25 | Toda mudança registrada | parcial | `log()` em parte das ações, no front |
 | RN26 | Histórico imutável | falta | Array em memória |
 | RN27 | Exportar CSV | parcial | Botão em `/gestao` gera CSV do mock (reaproveitável) |
 | RN28 | Painel: abertos, urgentes, a vencer, alertas | parcial | Abertos e alertas; falta urgentes e a vencer |
 | RN29 | Motivo nunca exposto a outros profissionais | **coberta** (B3) | tabela separada com RLS (gestor + anunciante). Antes: Só aparece em `/gestao`, mas o dado está no store de todos |
 
-**Totais (41 RNs):** coberta 33 · parcial 4 · falta 4 (após B6).
+**Totais (41 RNs):** coberta 36 · parcial 3 · falta 2 (após B7).
 
 ## 4. Divergências do mock a remover
 - Limite semanal de horas (`weeklyLimitHours`) — não existe nas RN.

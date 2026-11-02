@@ -3,6 +3,59 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      alerta: {
+        Row: {
+          anuncio_id: string | null;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          resolvido_em: string | null;
+          resolvido_por: string | null;
+          tipo: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          anuncio_id?: string | null;
+          criado_em?: string;
+          id?: string;
+          plantao_id: string;
+          resolvido_em?: string | null;
+          resolvido_por?: string | null;
+          tipo?: string;
+        };
+        Update: {
+          anuncio_id?: string | null;
+          criado_em?: string;
+          id?: string;
+          plantao_id?: string;
+          resolvido_em?: string | null;
+          resolvido_por?: string | null;
+          tipo?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "alerta_anuncio_id_fkey";
+            columns: ["anuncio_id"];
+            isOneToOne: false;
+            referencedRelation: "anuncio";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alerta_plantao_id_fkey";
+            columns: ["plantao_id"];
+            isOneToOne: false;
+            referencedRelation: "plantao";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alerta_resolvido_por_fkey";
+            columns: ["resolvido_por"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       anuncio: {
         Row: {
           adicional_definido_em: string | null;
@@ -539,6 +592,30 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      cancelar_anuncio: {
+        Args: { p_anuncio_id: string };
+        Returns: {
+          adicional_definido_em: string | null;
+          adicional_definido_por: string | null;
+          adicional_valor: number | null;
+          anunciante_id: string;
+          assumido_em: string | null;
+          assumido_por: string | null;
+          atualizado_em: string;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          plantao_id: string;
+          status: Database["public"]["Enums"]["status_anuncio"];
+          urgencia: Database["public"]["Enums"]["urgencia"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "anuncio";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       candidatar: {
         Args: { p_plantao_id: string };
         Returns: {
@@ -779,6 +856,24 @@ export type Database = {
         };
       };
       remover_plantao: { Args: { p_id: string }; Returns: undefined };
+      resolver_alerta: {
+        Args: { p_alerta_id: string };
+        Returns: {
+          anuncio_id: string | null;
+          criado_em: string;
+          id: string;
+          plantao_id: string;
+          resolvido_em: string | null;
+          resolvido_por: string | null;
+          tipo: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "alerta";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       categoria_profissional: "medico" | "enfermeiro";

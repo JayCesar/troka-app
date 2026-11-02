@@ -29,6 +29,28 @@ export interface MembroEquipe {
   confiavel: boolean;
 }
 
+// RN24: plantões em risco (RLS: só gestão do setor)
+export interface Alerta {
+  id: string;
+  criado_em: string;
+  plantao: { inicio: string; fim: string; especialidade: { nome: string } | null; profissional: { nome: string } | null } | null;
+}
+export function useAlertas() {
+  return useQuery({
+    queryKey: ["alertas"],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("alerta")
+          .select("id, criado_em, plantao(inicio, fim, especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome))")
+          .is("resolvido_em", null)
+          .order("criado_em", { ascending: false }),
+      ) as unknown as Alerta[],
+  });
+}
+export const useResolverAlerta = () =>
+  useAcaoGestor(async (id: string) => unwrap(await supabase.rpc("resolver_alerta", { p_alerta_id: id })));
+
 export function usePendencias() {
   return useQuery({ queryKey: ["pendencias"], queryFn: async () => unwrap(await supabase.rpc("pendencias_do_setor")) as unknown as Pendencia[] });
 }
@@ -42,7 +64,7 @@ function useAcaoGestor<A>(fn: (a: A) => Promise<unknown>) {
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      for (const k of ["pendencias", "equipe", "plantoes", "anuncios", "avisos"]) void qc.invalidateQueries({ queryKey: [k] });
+      for (const k of ["pendencias", "equipe", "plantoes", "anuncios", "avisos", "alertas"]) void qc.invalidateQueries({ queryKey: [k] });
     },
   });
 }

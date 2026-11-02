@@ -73,6 +73,17 @@ export function useDefinirAdicional() {
   });
 }
 
+// RN22: quem anunciou cancela antes da aprovação
+export function useCancelarAnuncio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => unwrap(await supabase.rpc("cancelar_anuncio", { p_anuncio_id: id })),
+    onSuccess: () => {
+      for (const k of ["plantoes", "anuncios", "ofertas", "pendencias"]) void qc.invalidateQueries({ queryKey: [k] });
+    },
+  });
+}
+
 // Anúncios do setor (RLS). O motivo só vem preenchido para gestor/anunciante (RN29); para os demais vem null.
 export function useAnunciosSetor() {
   return useQuery({
