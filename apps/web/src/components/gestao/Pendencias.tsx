@@ -13,7 +13,7 @@ export function Pendencias() {
       {isLoading && <p className="card p-5 text-center text-sm text-muted-foreground">Carregando…</p>}
       {error && <p className="card p-5 text-center text-sm text-destructive">Erro: {error.message}</p>}
       {data?.length === 0 && <p className="card p-5 text-center text-sm text-muted-foreground">Nenhuma troca ou candidatura pendente.</p>}
-      {data?.map((p) => <PendenciaCard key={p.tipo + p.id} p={p} />)}
+      <div className="grade-cards">{data?.map((p) => <PendenciaCard key={p.tipo + p.id} p={p} />)}</div>
     </section>
   );
 }

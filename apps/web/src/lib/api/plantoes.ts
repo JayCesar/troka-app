@@ -8,7 +8,7 @@ export type AnuncioResumo = Pick<Tables["anuncio"]["Row"], "id" | "status" | "ur
 export type Plantao = Tables["plantao"]["Row"] & {
   anuncio: AnuncioResumo[];
   especialidade: { nome: string } | null;
-  profissional: { nome: string } | null;
+  profissional: { nome: string; conselho_numero: string | null; conselho_uf: string | null } | null;
   setor: { nome: string } | null;
   hospital: { nome: string } | null;
 };
@@ -22,7 +22,7 @@ export interface PlantaoInput {
   profissionalId: string | null;
 }
 
-const SELECT = "*, anuncio(id, status, urgencia, expira_em, adicional_valor), especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome), setor(nome), hospital(nome)";
+const SELECT = "*, anuncio(id, status, urgencia, expira_em, adicional_valor), especialidade(nome), profissional:perfil!plantao_profissional_id_fkey(nome, conselho_numero, conselho_uf), setor(nome), hospital(nome)";
 
 // Anúncio "em aberto" (RN08 / decisão B3/P1): pendente, ou aberto ainda no prazo. Espelho da regra do banco, só para exibição.
 export function anuncioAtivo(p: Plantao): AnuncioResumo | null {

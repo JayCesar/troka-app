@@ -23,3 +23,13 @@ export async function enviarAoAssistente(_historico: MensagemChat[]): Promise<st
   // TODO(B11): integrar com o backend do assistente.
   throw new AssistenteNaoConectadoError();
 }
+
+/**
+ * PONTO DE INTEGRAÇÃO — transcrição de áudio (fallback quando o navegador não transcreve sozinho).
+ * Recebe o áudio gravado (webm/mp4) e devolve o texto. Implementar no backend (ex.: Edge Function
+ * `transcrever` com Whisper ou similar); nunca chamar o provedor direto do front.
+ */
+export async function transcreverAudio(_audio: Blob): Promise<string> {
+  // TODO(B11): integrar com o backend de transcrição.
+  throw new AssistenteNaoConectadoError();
+}

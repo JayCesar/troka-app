@@ -100,3 +100,48 @@
 - Plano: `docs/aidlc/construction/m1-melhorias-ui/plano.md`. Aprovação: respostas do usuário; execução iniciada.
 - Execução M1 (2026-11-03T02:10:00Z): `/calendario` com @dnd-kit (gestor arrasta, médico visualiza, otimista com reversão), botão/painel do assistente (sem backend), login redesenhado (mostrar senha, manter conectado, esqueci a senha → /definir-senha), cadastro do gestor com rótulos e tela cheia no celular; serviços isolados em `lib/services/`; templates de e-mail pt-BR (convite e recuperação).
 - Aprovação: pendente (teste manual do usuário).
+
+## 2026-11-02T22:10:00Z — M2 (Ajustes de UX: cadastro, início com IA, paleta, áudio, calendário, menu) — plano aprovado
+- Entrada do usuário: `exemplos/promtp-.md` (6 pontos + página inicial).
+- Decisões do usuário:
+  - D1: botão "Cadastre-se" → `/cadastro` só no front ("solicitar acesso" por e-mail para `VITE_CONTATO_EMAIL`). A RN01/RN01b fica preservada: a conta continua sendo criada pelo gestor.
+  - D2: áudio híbrido. A Web Speech API transcreve no navegador; como fallback, o MediaRecorder envia o áudio para `transcreverAudio` (ponto de integração, ainda sem backend, B11).
+  - D3: nova home `/inicio` (só logado), com o assistente em destaque e as ações do papel. `homeFor` passa a devolver `/inicio`. O logo leva a `/inicio` quando logado e a `/` quando não.
+  - D4: paleta a partir do favicon: navy `#031334` + branco. O destaque verde-água `#14A9A0` foi mantido por suposição, já que o favicon não tem cor de destaque. Tokens `--brand-*` em `styles.css`.
+- Execução:
+  - calendário com visões 3 dias / semana / 15 dias / mês (padrão: mês) e clique na data abrindo a visão de 3 dias;
+  - menu fixo no topo no desktop (rodapé só no celular);
+  - cursor pointer e hover globais.
+- Sem migration nem mudança de backend.
+- Verificação:
+  - `tsc` limpo, `vitest` 4/4, `vite build` ok;
+  - Lint: nenhum erro de regra, só formatação Prettier (existente no projeto) e avisos de fast-refresh.
+- Aprovação: pendente (teste manual do usuário).
+
+## 2026-11-02T23:30:00Z — M3 (Gestão em cards, plantões lista/tabela, pedido de acesso no banco)
+- Entrada do usuário:
+  - gestão dividida em cards: aprovações, anúncios, plantões, equipe e histórico;
+  - plantões em lista e tabela, com filtro por nome e por CRM/COREN;
+  - "coloquei um e-mail válido e não recebi nada".
+- Diagnóstico do e-mail:
+  - `/cadastro` só abria um `mailto:`, sem enviar nada;
+  - os convites do Supabase local vão para o Mailpit (http://localhost:54324), sem SMTP real e com limite de 2 e-mails/hora.
+- Decisões do usuário:
+  - D1: o pedido vira pendência no banco, sem depender de SMTP;
+  - D2: cards escuros com brilho em qualquer tema.
+- Execução:
+  - migration `20261102221000_m2_pedido_acesso.sql`:
+    - tabela `pedido_acesso` + RLS por hospital (RN30);
+    - `hospitais_para_cadastro` (anon);
+    - `solicitar_acesso` (anon, idempotente, não revela se o e-mail já tem conta, limite de 20/h por hospital);
+    - `resolver_pedido_acesso` (gestão).
+  - `m2_pedido_acesso.test.sql` 14/14 (total 192/192). Aplicada com `supabase migration up`, sem reset.
+  - Front:
+    - `/gestao` virou hub (Painel + Alertas + 5 cards `card-glow`) com subrotas `/gestao/{aprovacoes,anuncios,plantoes,equipe,historico}`;
+    - "Pedidos de acesso" ficam em Aprovações; Aprovar abre o cadastro pré-preenchido (convite RN01/RN01b) e marca o pedido como aprovado;
+    - Plantões ganharam Lista/Tabela (preferência lembrada no navegador) e filtros por nome e CRM/COREN;
+    - `/cadastro` grava pelo RPC; a variável `VITE_CONTATO_EMAIL` foi removida.
+- Verificação:
+  - `tsc` limpo, vitest 10/10, build ok;
+  - smoke test via REST: anon envia (204) e não lê a tabela (42501).
+- Pendente: SMTP real para convites fora do ambiente local (decisão de provedor).

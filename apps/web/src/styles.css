@@ -2,7 +2,9 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is([data-theme="escuro"] *));
+/* Tema Branco: superfícies "navy" ficam brancas (usado para trocar o logo com texto claro/escuro) */
+@custom-variant tema-branco (&:is([data-theme="branco"] *));
 
 @theme inline {
   --font-sans: "Manrope", system-ui, sans-serif;
@@ -32,57 +34,84 @@
   --color-warning: var(--warning);
   --color-navy: var(--navy);
   --color-navy-foreground: var(--navy-foreground);
+  --color-navy-erro: var(--navy-erro);
+  --color-marca: var(--brand-navy);
+  --color-grafico-1: var(--grafico-1);
+  --color-grafico-alerta: var(--grafico-alerta);
+  --color-grafico-grade: var(--grafico-grade); /* navy fixo da marca (overlays, sombras), não muda com o tema */
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 }
 
+/* ---------------------------------------------------------------------------
+ * Cores da marca — fonte única. Para ajustar a paleta, mude só estes 3 tokens.
+ * Os logos em logo/troka-logo/ (copiados para public/) usam exatamente navy e accent.
+ * ------------------------------------------------------------------------- */
 :root {
+  --brand-navy: #031334;
+  --brand-white: #ffffff;
+  --brand-accent: #14a9a0;
+
   --radius: 0.875rem;
-  /* navy #0B1F3A, teal #14A9A0 */
-  --navy: oklch(0.24 0.06 255);
-  --navy-foreground: oklch(0.98 0.005 240);
-  --background: oklch(0.975 0.005 240);
-  --foreground: oklch(0.22 0.05 255);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.05 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.05 255);
-  --primary: oklch(0.66 0.12 183);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.94 0.012 240);
-  --secondary-foreground: oklch(0.24 0.06 255);
-  --muted: oklch(0.95 0.008 240);
-  --muted-foreground: oklch(0.5 0.03 255);
-  --accent: oklch(0.93 0.04 183);
-  --accent-foreground: oklch(0.35 0.08 190);
+  --navy: var(--brand-navy);
+  --navy-foreground: var(--brand-white);
+  --background: color-mix(in oklab, var(--brand-navy) 3%, var(--brand-white));
+  --foreground: var(--brand-navy);
+  --card: var(--brand-white);
+  --card-foreground: var(--brand-navy);
+  --popover: var(--brand-white);
+  --popover-foreground: var(--brand-navy);
+  --primary: var(--brand-accent);
+  --primary-foreground: var(--brand-white);
+  --secondary: color-mix(in oklab, var(--brand-navy) 7%, var(--brand-white));
+  --secondary-foreground: var(--brand-navy);
+  --muted: color-mix(in oklab, var(--brand-navy) 5%, var(--brand-white));
+  --muted-foreground: color-mix(in oklab, var(--brand-navy) 60%, var(--brand-white));
+  --accent: color-mix(in oklab, var(--brand-accent) 14%, var(--brand-white));
+  --accent-foreground: color-mix(in oklab, var(--brand-accent) 55%, var(--brand-navy));
   --destructive: oklch(0.58 0.21 27);
   --destructive-foreground: oklch(0.99 0 0);
   --success: oklch(0.62 0.14 155);
   --warning: oklch(0.72 0.16 65);
-  --border: oklch(0.91 0.012 240);
-  --input: oklch(0.89 0.015 240);
-  --ring: oklch(0.66 0.12 183);
+  --border: color-mix(in oklab, var(--brand-navy) 11%, var(--brand-white));
+  --input: color-mix(in oklab, var(--brand-navy) 14%, var(--brand-white));
+  --ring: var(--brand-accent);
+  --navy-erro: #fca5a5; /* texto de erro sobre superfície navy */
+  /* Gráficos (validados com o validador de paleta: claro e escuro). Contraste < 3:1 no claro → sempre com rótulos/tabela */
+  --grafico-1: #14a9a0;       /* série principal: com profissional / horas */
+  --grafico-alerta: #d99a2b;  /* estado: sem profissional (sempre com ícone + rótulo) */
+  --grafico-grade: color-mix(in oklab, var(--brand-navy) 8%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.17 0.04 255);
-    --foreground: oklch(0.96 0.008 240);
-    --card: oklch(0.22 0.05 255);
-    --card-foreground: oklch(0.96 0.008 240);
-    --popover: oklch(0.22 0.05 255);
-    --popover-foreground: oklch(0.96 0.008 240);
-    --secondary: oklch(0.28 0.05 255);
-    --secondary-foreground: oklch(0.96 0.008 240);
-    --muted: oklch(0.26 0.04 255);
-    --muted-foreground: oklch(0.72 0.03 245);
-    --accent: oklch(0.32 0.06 190);
-    --accent-foreground: oklch(0.88 0.08 183);
-    --border: oklch(0.3 0.04 255);
-    --input: oklch(0.34 0.04 255);
-    --navy: oklch(0.13 0.04 255);
-  }
+/* Tema Branco: tudo claro, inclusive cabeçalho e login (superfícies "navy" viram brancas) */
+:root[data-theme="branco"] {
+  --navy: var(--brand-white);
+  --navy-foreground: var(--brand-navy);
+  --navy-erro: var(--destructive);
+  --background: var(--brand-white);
+}
+
+/* Tema Escuro */
+:root[data-theme="escuro"] {
+  color-scheme: dark;
+  --navy: color-mix(in oklab, var(--brand-navy) 80%, black);
+  --background: var(--brand-navy);
+  --foreground: color-mix(in oklab, var(--brand-white) 94%, var(--brand-navy));
+  --card: color-mix(in oklab, var(--brand-navy) 88%, var(--brand-white));
+  --card-foreground: color-mix(in oklab, var(--brand-white) 94%, var(--brand-navy));
+  --popover: color-mix(in oklab, var(--brand-navy) 88%, var(--brand-white));
+  --popover-foreground: color-mix(in oklab, var(--brand-white) 94%, var(--brand-navy));
+  --secondary: color-mix(in oklab, var(--brand-navy) 82%, var(--brand-white));
+  --secondary-foreground: color-mix(in oklab, var(--brand-white) 94%, var(--brand-navy));
+  --muted: color-mix(in oklab, var(--brand-navy) 85%, var(--brand-white));
+  --muted-foreground: color-mix(in oklab, var(--brand-white) 65%, var(--brand-navy));
+  --accent: color-mix(in oklab, var(--brand-accent) 25%, var(--brand-navy));
+  --accent-foreground: color-mix(in oklab, var(--brand-accent) 55%, var(--brand-white));
+  --border: color-mix(in oklab, var(--brand-navy) 80%, var(--brand-white));
+  --input: color-mix(in oklab, var(--brand-navy) 75%, var(--brand-white));
+  --grafico-alerta: #c08420; /* passo escuro validado contra a superfície escura */
+  --grafico-grade: color-mix(in oklab, var(--brand-white) 8%, transparent);
 }
 
 @layer base {
@@ -94,6 +123,9 @@
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  /* Só o que é acionável mostra a "mãozinha"; o resto mantém o cursor padrão. */
+  button:not(:disabled), a[href], [role="button"]:not([aria-disabled="true"]), label[for], select, summary,
+  input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled) { cursor: pointer; }
 }
 
 @utility btn {
@@ -105,19 +137,20 @@
 @utility btn-primary {
   background: var(--primary); color: var(--primary-foreground);
   box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--primary) 70%, transparent);
-  &:hover:not(:disabled) { filter: brightness(1.05); }
+  &:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 8px 22px -8px color-mix(in oklab, var(--primary) 85%, transparent); }
 }
 @utility btn-outline {
   border: 1px solid var(--border); background: var(--card); color: var(--foreground);
-  &:hover { background: var(--muted); }
+  &:hover:not(:disabled) { background: var(--muted); border-color: color-mix(in oklab, var(--primary) 50%, var(--border)); }
 }
 @utility btn-danger {
   background: color-mix(in oklab, var(--destructive) 12%, transparent); color: var(--destructive);
+  &:hover:not(:disabled) { background: color-mix(in oklab, var(--destructive) 20%, transparent); }
 }
 @utility card {
   background: var(--card); color: var(--card-foreground);
   border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px);
-  box-shadow: 0 1px 2px color-mix(in oklab, var(--navy) 6%, transparent);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--brand-navy) 6%, transparent);
 }
 @utility field {
   width: 100%; min-height: 3rem; padding: 0 0.875rem; border-radius: var(--radius);
@@ -127,4 +160,70 @@
 @utility chip {
   display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap;
   padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+  transition: background-color 150ms, color 150ms, filter 150ms;
+  &:is(button, a):hover:not(:disabled) { filter: brightness(0.95); }
 }
+
+/* Card escuro do hub da gestão (sem brilho colorido; hover só realça borda e eleva) */
+@utility card-escuro {
+  display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem;
+  min-height: 15rem; border-radius: 1.25rem;
+  background: color-mix(in oklab, var(--brand-navy) 88%, var(--brand-white));
+  border: 1px solid color-mix(in oklab, var(--brand-white) 10%, transparent);
+  color: var(--brand-white);
+  box-shadow: 0 10px 30px -12px color-mix(in oklab, black 60%, transparent);
+  transition: transform 200ms, border-color 200ms, box-shadow 200ms;
+  &:hover, &:focus-visible {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--brand-white) 28%, transparent);
+    box-shadow: 0 18px 40px -16px color-mix(in oklab, black 70%, transparent);
+    outline: none;
+  }
+}
+
+/* Lista de cards que se distribui pela largura disponível: 1 coluna no celular, várias no desktop */
+@utility grade-cards {
+  display: grid; gap: 0.75rem; align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+}
+
+/* ---- Efeitos do Início (respeitam "reduzir movimento" do sistema) ---- */
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+/* Entrada em cascata: style={{ "--atraso": "120ms" }} */
+@utility entrar {
+  animation: entrar 550ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--atraso, 0ms);
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+@keyframes flutuar {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(28px, -18px) scale(1.12); }
+}
+@utility flutuar {
+  animation: flutuar 14s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+@keyframes trocar-texto {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@utility trocar-texto {
+  animation: trocar-texto 400ms ease-out both;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+/* Luz que segue o mouse (vars --mx/--my definidas no onMouseMove) */
+@utility holofote {
+  position: relative; isolation: isolate;
+  &::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--foreground) 7%, transparent), transparent 70%);
+    opacity: 0; transition: opacity 200ms;
+  }
+  &:hover::before { opacity: 1; }
+}
+
+/* Seções em tela cheia do Início: animações de entrada só rodam quando a seção aparece */
+[data-secao]:not([data-visivel]) .entrar { animation-play-state: paused; }

@@ -1,8 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
 
-import { Logo } from "@/components/AppShell";
+import { LogoLink } from "@/components/AppShell";
+import { SeletorTema } from "@/components/SeletorTema";
 import { homeFor, useAuth } from "@/lib/auth";
 import { lembrarSessao, supabase } from "@/lib/supabase";
 
@@ -24,7 +25,7 @@ const DEMO = [
 const DEMO_PASSWORD = "troka123"; // só existe no seed local
 
 // Campos no tema escuro da tela (reaproveita .field e só ajusta as cores)
-const CAMPO = "field border-white/10 bg-white/5 text-navy-foreground placeholder:text-navy-foreground/40 focus:border-primary";
+const CAMPO = "field border-navy-foreground/10 bg-navy-foreground/5 text-navy-foreground placeholder:text-navy-foreground/40 focus:border-primary";
 
 function Login() {
   const { signIn, perfil, loading } = useAuth();
@@ -68,17 +69,22 @@ function Login() {
   return (
     <div className="min-h-screen bg-navy text-navy-foreground md:grid md:grid-cols-2">
       {/* Painel ilustrativo — só a partir de tablet/desktop */}
-      <aside className="relative hidden flex-col justify-center gap-6 overflow-hidden border-r border-white/5 p-10 md:flex">
-        <div className="absolute left-10 top-8 flex items-center gap-3"><Logo size={40} /><span className="text-lg font-bold">TroKa</span></div>
+      <aside className="relative hidden flex-col justify-center overflow-hidden p-10 md:flex">
+        <span aria-hidden className="absolute bottom-[12%] right-0 top-[12%] w-px bg-gradient-to-b from-transparent via-navy-foreground/25 to-transparent" />
+        <div className="absolute left-10 top-8"><LogoLink size={44} completo /></div>
+        {/* Bloco encostado à direita da metade esquerda: fica mais perto do formulário */}
+        <div className="ml-auto flex w-full max-w-md flex-col gap-6 lg:mr-6 xl:mr-16">
         <span className="w-fit rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">● Trocas em tempo real</span>
         <h1 className="max-w-md text-4xl font-bold leading-tight">Plantões e trocas, sempre em dia.</h1>
         <p className="max-w-md text-navy-foreground/70">Consulte sua escala, anuncie e assuma plantões, e deixe as regras de descanso e especialidade com o sistema.</p>
         <EscalaIlustrativa />
+        </div>
       </aside>
 
-      <main className="flex min-h-screen flex-col justify-center px-6 py-10 md:px-16">
-        <div className="mx-auto w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-3 md:hidden"><Logo size={40} /><span className="text-lg font-bold">TroKa</span></div>
+      <main className="relative flex min-h-screen flex-col justify-center px-6 py-10 md:px-10">
+        <SeletorTema className="absolute right-4 top-4" />
+        <div className="mx-auto w-full max-w-sm md:ml-6 lg:ml-12 xl:ml-20">
+          <div className="mb-8 md:hidden"><LogoLink size={44} completo /></div>
           <h2 className="text-2xl font-bold">Acesse sua conta</h2>
           <p className="mt-1 text-sm text-navy-foreground/70">Entre com seu e-mail e senha. Suas permissões são carregadas automaticamente.</p>
 
@@ -92,7 +98,7 @@ function Login() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label htmlFor="login-senha" className="text-sm font-semibold">Senha</label>
-                <button type="button" onClick={() => void esqueci()} disabled={busy} className="text-sm font-semibold text-primary hover:underline">Esqueceu a senha?</button>
+                <button type="button" onClick={() => void esqueci()} disabled={busy} className="text-sm font-semibold text-primary hover:underline hover:brightness-110">Esqueceu a senha?</button>
               </div>
               <div className="relative">
                 <input id="login-senha" className={`${CAMPO} pr-12`} type={verSenha ? "text" : "password"} autoComplete="current-password"
@@ -110,19 +116,26 @@ function Login() {
             </label>
 
             <div aria-live="polite">
-              {error && <p className="rounded-lg bg-destructive/15 p-3 text-sm font-medium text-red-300">{error}</p>}
+              {error && <p className="rounded-lg bg-destructive/15 p-3 text-sm font-medium text-navy-erro">{error}</p>}
               {info && <p className="rounded-lg bg-primary/15 p-3 text-sm font-medium text-primary">{info}</p>}
             </div>
 
             <button className="btn btn-primary min-h-12 w-full text-base shadow-[0_8px_30px_-8px_var(--color-primary)]" disabled={busy}>{busy ? "Entrando…" : "Entrar"}</button>
           </form>
 
+          <div className="mt-6 flex flex-col items-center gap-3 border-t border-navy-foreground/10 pt-6 text-sm">
+            <span className="text-navy-foreground/70">Ainda não tem conta?</span>
+            <Link to="/cadastro" className="btn min-h-12 w-full border border-primary/60 text-primary transition-colors hover:bg-primary/15">
+              <UserPlus className="h-4 w-4" aria-hidden />Cadastre-se
+            </Link>
+          </div>
+
           {import.meta.env.DEV && (
-            <div className="mt-8 border-t border-white/10 pt-6">
+            <div className="mt-8 border-t border-navy-foreground/10 pt-6">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-navy-foreground/50">Acesso de demonstração (local)</p>
               <div className="flex flex-wrap gap-2">
                 {DEMO.map((u) => (
-                  <button type="button" key={u.email} disabled={busy} onClick={() => void go(u.email, DEMO_PASSWORD)} className="chip bg-white/10 text-navy-foreground hover:bg-white/15">
+                  <button type="button" key={u.email} disabled={busy} onClick={() => void go(u.email, DEMO_PASSWORD)} className="chip bg-navy-foreground/10 text-navy-foreground hover:bg-navy-foreground/20">
                     {u.label}
                   </button>
                 ))}
@@ -143,9 +156,9 @@ function EscalaIlustrativa() {
     ["Carla", [2, 0, 1, 0, 2, 2, 0]],
     ["Diego", [1, 2, 0, 2, 0, 1, 2]],
   ];
-  const cor = ["bg-white/5", "bg-primary/40", "bg-primary"];
+  const cor = ["bg-navy-foreground/5", "bg-primary/40", "bg-primary"];
   return (
-    <div aria-hidden className="max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+    <div aria-hidden className="max-w-md rounded-2xl border border-navy-foreground/10 bg-navy-foreground/[0.03] p-5">
       <div className="mb-4 flex justify-between text-sm"><span className="font-semibold">Escala da semana</span><span className="text-xs tracking-wider text-navy-foreground/50">SEG – DOM</span></div>
       <div className="space-y-2">
         {linhas.map(([nome, dias]) => (
@@ -155,10 +168,10 @@ function EscalaIlustrativa() {
           </div>
         ))}
       </div>
-      <div className="mt-4 flex gap-4 border-t border-white/10 pt-3 text-xs text-navy-foreground/60">
+      <div className="mt-4 flex gap-4 border-t border-navy-foreground/10 pt-3 text-xs text-navy-foreground/60">
         <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary" />Plantão</span>
         <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary/40" />Troca</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-white/5" />Livre</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-navy-foreground/5" />Livre</span>
       </div>
     </div>
   );

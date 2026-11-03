@@ -29,7 +29,7 @@ export function CadastroProfissional() {
   const [aberto, setAberto] = useState(false);
   return (
     <>
-      <button className="btn btn-outline w-full" onClick={() => setAberto(true)}><UserPlus className="h-4 w-4" aria-hidden />Cadastrar profissional</button>
+      <button className="btn btn-outline w-full sm:w-auto" onClick={() => setAberto(true)}><UserPlus className="h-4 w-4" aria-hidden />Cadastrar profissional</button>
       {aberto && <Formulario onClose={() => setAberto(false)} />}
     </>
   );
@@ -47,10 +47,10 @@ function Campo({ id, label, dica, children }: { id: string; label: string; dica?
   );
 }
 
-function Formulario({ onClose }: { onClose: () => void }) {
+export function Formulario({ onClose, inicial, onCadastrado }: { onClose: () => void; inicial?: Partial<NovoProfissional>; onCadastrado?: () => void }) {
   const especialidades = useEspecialidades();
   const cadastrar = useCadastrar();
-  const [f, setF] = useState<NovoProfissional>(VAZIO);
+  const [f, setF] = useState<NovoProfissional>(() => ({ ...VAZIO, ...inicial }));
   const [erro, setErro] = useState("");
   const daCategoria = (especialidades.data ?? []).filter((e) => e.categoria === f.categoria);
   const conselho = f.categoria === "medico" ? "CRM" : "COREN";
@@ -67,6 +67,7 @@ function Formulario({ onClose }: { onClose: () => void }) {
     cadastrar.mutate(f, {
       onSuccess: (r) => {
         toast.success(`Cadastrado (${STATUS_VALIDACAO[r.validacao] ?? r.validacao}). Convite enviado para ${f.email}.`);
+        onCadastrado?.();
         onClose();
       },
       onError: (err) => setErro(err.message),
@@ -74,7 +75,7 @@ function Formulario({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-navy/60 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="cadastro-titulo"
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-marca/60 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="cadastro-titulo"
       onKeyDown={(e) => e.key === "Escape" && onClose()}>
       {/* Celular: tela cheia com botão fixo embaixo. Desktop: janela central. */}
       <form className="flex h-[100dvh] w-full flex-col bg-background sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-3xl" onSubmit={submit} noValidate>

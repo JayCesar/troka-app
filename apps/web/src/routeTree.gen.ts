@@ -12,10 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnunciarRouteImport } from './routes/anunciar'
 import { Route as AssumirRouteImport } from './routes/assumir'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
-import { Route as GestaoRouteImport } from './routes/gestao'
+import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as PlantoesRouteImport } from './routes/plantoes'
+import { Route as GestaoIndexRouteImport } from './routes/gestao.index'
+import { Route as GestaoAnunciosRouteImport } from './routes/gestao.anuncios'
+import { Route as GestaoAprovacoesRouteImport } from './routes/gestao.aprovacoes'
+import { Route as GestaoEquipeRouteImport } from './routes/gestao.equipe'
+import { Route as GestaoHistoricoRouteImport } from './routes/gestao.historico'
+import { Route as GestaoPlantoesRouteImport } from './routes/gestao.plantoes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,6 +39,11 @@ const AssumirRoute = AssumirRouteImport.update({
   path: '/assumir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -42,9 +54,9 @@ const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
   path: '/definir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GestaoRoute = GestaoRouteImport.update({
-  id: '/gestao',
-  path: '/gestao',
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlantoesRoute = PlantoesRouteImport.update({
@@ -52,34 +64,85 @@ const PlantoesRoute = PlantoesRouteImport.update({
   path: '/plantoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GestaoIndexRoute = GestaoIndexRouteImport.update({
+  id: '/gestao/',
+  path: '/gestao/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoAnunciosRoute = GestaoAnunciosRouteImport.update({
+  id: '/gestao/anuncios',
+  path: '/gestao/anuncios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoAprovacoesRoute = GestaoAprovacoesRouteImport.update({
+  id: '/gestao/aprovacoes',
+  path: '/gestao/aprovacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoEquipeRoute = GestaoEquipeRouteImport.update({
+  id: '/gestao/equipe',
+  path: '/gestao/equipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoHistoricoRoute = GestaoHistoricoRouteImport.update({
+  id: '/gestao/historico',
+  path: '/gestao/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoPlantoesRoute = GestaoPlantoesRouteImport.update({
+  id: '/gestao/plantoes',
+  path: '/gestao/plantoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/cadastro': typeof CadastroRoute
   '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/gestao': typeof GestaoRoute
+  '/inicio': typeof InicioRoute
   '/plantoes': typeof PlantoesRoute
+  '/gestao/anuncios': typeof GestaoAnunciosRoute
+  '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/equipe': typeof GestaoEquipeRoute
+  '/gestao/historico': typeof GestaoHistoricoRoute
+  '/gestao/plantoes': typeof GestaoPlantoesRoute
+  '/gestao/': typeof GestaoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/cadastro': typeof CadastroRoute
   '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/gestao': typeof GestaoRoute
+  '/inicio': typeof InicioRoute
   '/plantoes': typeof PlantoesRoute
+  '/gestao/anuncios': typeof GestaoAnunciosRoute
+  '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/equipe': typeof GestaoEquipeRoute
+  '/gestao/historico': typeof GestaoHistoricoRoute
+  '/gestao/plantoes': typeof GestaoPlantoesRoute
+  '/gestao': typeof GestaoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/anunciar': typeof AnunciarRoute
   '/assumir': typeof AssumirRoute
+  '/cadastro': typeof CadastroRoute
   '/calendario': typeof CalendarioRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/gestao': typeof GestaoRoute
+  '/inicio': typeof InicioRoute
   '/plantoes': typeof PlantoesRoute
+  '/gestao/anuncios': typeof GestaoAnunciosRoute
+  '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/equipe': typeof GestaoEquipeRoute
+  '/gestao/historico': typeof GestaoHistoricoRoute
+  '/gestao/plantoes': typeof GestaoPlantoesRoute
+  '/gestao/': typeof GestaoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,38 +150,66 @@ export interface FileRouteTypes {
     | '/'
     | '/anunciar'
     | '/assumir'
+    | '/cadastro'
     | '/calendario'
     | '/definir-senha'
-    | '/gestao'
+    | '/inicio'
     | '/plantoes'
+    | '/gestao/anuncios'
+    | '/gestao/aprovacoes'
+    | '/gestao/equipe'
+    | '/gestao/historico'
+    | '/gestao/plantoes'
+    | '/gestao/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/anunciar'
     | '/assumir'
+    | '/cadastro'
     | '/calendario'
     | '/definir-senha'
-    | '/gestao'
+    | '/inicio'
     | '/plantoes'
+    | '/gestao/anuncios'
+    | '/gestao/aprovacoes'
+    | '/gestao/equipe'
+    | '/gestao/historico'
+    | '/gestao/plantoes'
+    | '/gestao'
   id:
     | '__root__'
     | '/'
     | '/anunciar'
     | '/assumir'
+    | '/cadastro'
     | '/calendario'
     | '/definir-senha'
-    | '/gestao'
+    | '/inicio'
     | '/plantoes'
+    | '/gestao/anuncios'
+    | '/gestao/aprovacoes'
+    | '/gestao/equipe'
+    | '/gestao/historico'
+    | '/gestao/plantoes'
+    | '/gestao/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnunciarRoute: typeof AnunciarRoute
   AssumirRoute: typeof AssumirRoute
+  CadastroRoute: typeof CadastroRoute
   CalendarioRoute: typeof CalendarioRoute
   DefinirSenhaRoute: typeof DefinirSenhaRoute
-  GestaoRoute: typeof GestaoRoute
+  InicioRoute: typeof InicioRoute
   PlantoesRoute: typeof PlantoesRoute
+  GestaoAnunciosRoute: typeof GestaoAnunciosRoute
+  GestaoAprovacoesRoute: typeof GestaoAprovacoesRoute
+  GestaoEquipeRoute: typeof GestaoEquipeRoute
+  GestaoHistoricoRoute: typeof GestaoHistoricoRoute
+  GestaoPlantoesRoute: typeof GestaoPlantoesRoute
+  GestaoIndexRoute: typeof GestaoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -144,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssumirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendario': {
       id: '/calendario'
       path: '/calendario'
@@ -158,11 +256,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gestao': {
-      id: '/gestao'
-      path: '/gestao'
-      fullPath: '/gestao'
-      preLoaderRoute: typeof GestaoRouteImport
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plantoes': {
@@ -172,6 +270,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlantoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gestao/': {
+      id: '/gestao/'
+      path: '/gestao'
+      fullPath: '/gestao/'
+      preLoaderRoute: typeof GestaoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao/anuncios': {
+      id: '/gestao/anuncios'
+      path: '/gestao/anuncios'
+      fullPath: '/gestao/anuncios'
+      preLoaderRoute: typeof GestaoAnunciosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao/aprovacoes': {
+      id: '/gestao/aprovacoes'
+      path: '/gestao/aprovacoes'
+      fullPath: '/gestao/aprovacoes'
+      preLoaderRoute: typeof GestaoAprovacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao/equipe': {
+      id: '/gestao/equipe'
+      path: '/gestao/equipe'
+      fullPath: '/gestao/equipe'
+      preLoaderRoute: typeof GestaoEquipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao/historico': {
+      id: '/gestao/historico'
+      path: '/gestao/historico'
+      fullPath: '/gestao/historico'
+      preLoaderRoute: typeof GestaoHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao/plantoes': {
+      id: '/gestao/plantoes'
+      path: '/gestao/plantoes'
+      fullPath: '/gestao/plantoes'
+      preLoaderRoute: typeof GestaoPlantoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -179,10 +319,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnunciarRoute: AnunciarRoute,
   AssumirRoute: AssumirRoute,
+  CadastroRoute: CadastroRoute,
   CalendarioRoute: CalendarioRoute,
   DefinirSenhaRoute: DefinirSenhaRoute,
-  GestaoRoute: GestaoRoute,
+  InicioRoute: InicioRoute,
   PlantoesRoute: PlantoesRoute,
+  GestaoAnunciosRoute: GestaoAnunciosRoute,
+  GestaoAprovacoesRoute: GestaoAprovacoesRoute,
+  GestaoEquipeRoute: GestaoEquipeRoute,
+  GestaoHistoricoRoute: GestaoHistoricoRoute,
+  GestaoPlantoesRoute: GestaoPlantoesRoute,
+  GestaoIndexRoute: GestaoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

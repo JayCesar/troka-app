@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { CalendarPlus, Pencil, Trash2, X } from "lucide-react";
+import { CalendarPlus, LayoutList, Pencil, Search, Table2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { PlantaoCard } from "@/components/PlantaoCard";
 import {
+  anuncioAtivo,
   useCriarPlantao,
   useEditarPlantao,
   useEspecialidades,
@@ -12,13 +13,63 @@ import {
   useRemoverPlantao,
   type Plantao,
 } from "@/lib/api/plantoes";
+import { fmtDay, fmtTime } from "@/lib/format";
+
+type Visao = "lista" | "tabela";
+const CHAVE_VISAO = "troka.gestao.plantoes.visao";
+const lerVisao = (): Visao => {
+  try {
+    return localStorage.getItem(CHAVE_VISAO) === "tabela" ? "tabela" : "lista";
+  } catch {
+    return "lista";
+  }
+};
+const salvarVisao = (v: Visao) => {
+  try {
+    localStorage.setItem(CHAVE_VISAO, v);
+  } catch {
+    /* sem storage (aba anônima): só não lembra a escolha */
+  }
+};
+
+// Busca sem acento e sem diferenciar maiúsculas
+const normalizar = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const conselhoDe = (p: Plantao) =>
+  p.profissional?.conselho_numero ? `${p.profissional.conselho_numero}/${p.profissional.conselho_uf ?? ""}` : "";
+
+function statusDe(p: Plantao): { label: string; cls: string } {
+  const a = anuncioAtivo(p);
+  if (a?.status === "pendente") return { label: "Troca pendente", cls: "bg-warning/15 text-warning" };
+  if (a) return { label: a.urgencia === "urgente" ? "Anunciado · urgente" : "Anunciado", cls: "bg-warning/15 text-warning" };
+  if (!p.profissional_id) return { label: "Em aberto", cls: "bg-secondary text-secondary-foreground" };
+  return { label: "Escalado", cls: "bg-success/15 text-success" };
+}
 
 // RN05: gestor cria, edita e remove plantões do próprio setor. As regras são validadas no banco.
 export function PlantoesSetor() {
   const { data, isLoading, error } = usePlantoesSetor();
   const remover = useRemoverPlantao();
   const [form, setForm] = useState<{ plantao?: Plantao } | null>(null);
+  const [visao, setVisao] = useState<Visao>(lerVisao);
+  const [nome, setNome] = useState("");
+  const [crm, setCrm] = useState("");
   const agora = Date.now();
+
+  const filtrados = useMemo(() => {
+    const n = normalizar(nome);
+    const c = crm.toUpperCase().replace(/[^0-9A-Z]/g, "");
+    return (data ?? []).filter((p) => {
+      if (n && !normalizar(p.profissional?.nome ?? "em aberto").includes(n)) return false;
+      if (c && !conselhoDe(p).replace(/[^0-9A-Z]/g, "").includes(c)) return false;
+      return true;
+    });
+  }, [data, nome, crm]);
+  const filtrando = !!(nome.trim() || crm.trim());
+
+  const mudarVisao = (v: Visao) => {
+    setVisao(v);
+    salvarVisao(v);
+  };
 
   const onRemover = (p: Plantao) => {
     if (!confirm("Remover este plantão?")) return;
@@ -27,31 +78,110 @@ export function PlantoesSetor() {
       onError: (e) => toast.error(e.message),
     });
   };
+  const editavel = (p: Plantao) => new Date(p.inicio).getTime() > agora; // espelho da regra do banco (B2/P3), só para UX
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Plantões do setor</h2>
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div role="group" aria-label="Modo de visualização" className="inline-flex rounded-full border bg-card p-1">
+          {([["lista", "Lista", LayoutList], ["tabela", "Tabela", Table2]] as const).map(([id, label, Icone]) => (
+            <button key={id} type="button" aria-pressed={visao === id} onClick={() => mudarVisao(id)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${visao === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+              <Icone className="h-4 w-4" aria-hidden />{label}
+            </button>
+          ))}
+        </div>
         <button className="btn btn-primary min-h-10 text-sm" onClick={() => setForm({})}>
           <CalendarPlus className="h-4 w-4" />Novo plantão
         </button>
       </div>
+
+      {/* Filtros */}
+      <div className="grid gap-2 sm:grid-cols-[1fr_14rem_auto]">
+        <label className="relative block">
+          <span className="sr-only">Filtrar por nome do profissional</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <input className="field pl-9" placeholder="Nome do profissional" value={nome} onChange={(e) => setNome(e.target.value)} />
+        </label>
+        <label className="relative block">
+          <span className="sr-only">Filtrar por CRM ou COREN</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <input className="field pl-9" placeholder="CRM/COREN (ex.: 123456/SP)" value={crm} onChange={(e) => setCrm(e.target.value)} />
+        </label>
+        {filtrando && (
+          <button type="button" className="btn btn-outline min-h-12 text-sm" onClick={() => { setNome(""); setCrm(""); }}>
+            <X className="h-4 w-4" aria-hidden />Limpar
+          </button>
+        )}
+      </div>
+      {data && filtrando && <p className="text-xs text-muted-foreground" aria-live="polite">{filtrados.length} de {data.length} plantões</p>}
+
       {isLoading && <p className="card p-5 text-center text-sm text-muted-foreground">Carregando…</p>}
       {error && <p className="card p-5 text-center text-sm text-destructive">Erro: {error.message}</p>}
       {data?.length === 0 && <p className="card p-5 text-center text-sm text-muted-foreground">Nenhum plantão futuro.</p>}
-      {data?.map((p) => {
-        const editavel = new Date(p.inicio).getTime() > agora; // espelho da regra do banco (B2/P3), só para UX
-        return (
-          <PlantaoCard key={p.id} plantao={p} showProfissional>
-            {editavel && (
-              <div className="grid grid-cols-2 gap-2">
-                <button className="btn btn-outline min-h-10 text-sm" onClick={() => setForm({ plantao: p })}><Pencil className="h-4 w-4" />Editar</button>
-                <button className="btn btn-danger min-h-10 text-sm" disabled={remover.isPending} onClick={() => onRemover(p)}><Trash2 className="h-4 w-4" />Remover</button>
-              </div>
-            )}
-          </PlantaoCard>
-        );
-      })}
+      {data && data.length > 0 && filtrados.length === 0 && (
+        <p className="card p-5 text-center text-sm text-muted-foreground">Nenhum plantão para esse filtro.</p>
+      )}
+
+      {visao === "lista" ? (
+        <div className="grade-cards">
+          {filtrados.map((p) => (
+            <PlantaoCard key={p.id} plantao={p} showProfissional>
+              {conselhoDe(p) && <p className="-mt-2 mb-3 text-xs text-muted-foreground">{p.profissional?.nome} · {conselhoDe(p)}</p>}
+              {editavel(p) && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button className="btn btn-outline min-h-10 text-sm" onClick={() => setForm({ plantao: p })}><Pencil className="h-4 w-4" />Editar</button>
+                  <button className="btn btn-danger min-h-10 text-sm" disabled={remover.isPending} onClick={() => onRemover(p)}><Trash2 className="h-4 w-4" />Remover</button>
+                </div>
+              )}
+            </PlantaoCard>
+          ))}
+        </div>
+      ) : (
+        filtrados.length > 0 && (
+          <div className="card overflow-x-auto">
+            <table className="w-full min-w-[46rem] text-left text-sm">
+              <thead className="border-b bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Data</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Horário</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Especialidade</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Profissional</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">CRM/COREN</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-semibold">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filtrados.map((p) => {
+                  const i = new Date(p.inicio).getTime();
+                  const st = statusDe(p);
+                  return (
+                    <tr key={p.id} className="transition-colors hover:bg-muted/50">
+                      <td className="whitespace-nowrap px-3 py-2.5 font-semibold">{fmtDay(i)}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{fmtTime(i)}–{fmtTime(new Date(p.fim).getTime())}</td>
+                      <td className="px-3 py-2.5">{p.especialidade?.nome}</td>
+                      <td className="px-3 py-2.5">{p.profissional?.nome ?? <span className="text-muted-foreground">Em aberto</span>}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-muted-foreground">{conselhoDe(p) || "—"}</td>
+                      <td className="px-3 py-2.5"><span className={`chip ${st.cls}`}>{st.label}</span></td>
+                      <td className="px-3 py-2.5">
+                        {editavel(p) && (
+                          <div className="flex justify-end gap-1">
+                            <button className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => setForm({ plantao: p })} aria-label={`Editar plantão de ${fmtDay(i)}`} title="Editar"><Pencil className="h-4 w-4" /></button>
+                            <button className="grid h-9 w-9 place-items-center rounded-lg text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-45"
+                              disabled={remover.isPending} onClick={() => onRemover(p)} aria-label={`Remover plantão de ${fmtDay(i)}`} title="Remover"><Trash2 className="h-4 w-4" /></button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
       {form && <PlantaoForm plantao={form.plantao} onClose={() => setForm(null)} />}
     </section>
   );
@@ -146,7 +276,7 @@ function PlantaoForm({ plantao, onClose }: { plantao?: Plantao | undefined; onCl
   );
 
   return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-navy/60 sm:items-center">
+    <div className="fixed inset-0 z-30 flex items-end justify-center bg-marca/60 sm:items-center">
       <form className="max-h-[90vh] w-full max-w-lg space-y-4 overflow-auto rounded-t-3xl bg-background p-6 sm:rounded-3xl" onSubmit={submit}>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">{plantao ? "Editar plantão" : "Novo plantão"}</h2>

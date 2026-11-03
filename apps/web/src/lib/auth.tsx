@@ -86,4 +86,5 @@ export function useAuth() {
   return c;
 }
 
-export const homeFor = (papel: Papel) => (papel === "gestor" ? "/gestao" : "/plantoes");
+// Destino após o login e nos redirecionamentos: a página inicial (assistente + ações do papel).
+export const homeFor = (_papel: Papel) => "/inicio" as const;

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Logo } from "@/components/AppShell";
+import { LogoCompleto } from "@/components/AppShell";
 import { homeFor, useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 
@@ -36,7 +36,7 @@ function DefinirSenha() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-navy px-6 text-navy-foreground">
-      <Logo size={44} />
+      <LogoCompleto altura={48} />
       <div className="card mt-6 w-full max-w-sm p-6 text-foreground">
         {loading ? (
           <p className="text-center text-muted-foreground">Abrindo seu convite…</p>

@@ -15,6 +15,7 @@ export function AnunciosSetor() {
       {isLoading && <p className="card p-5 text-center text-sm text-muted-foreground">Carregando…</p>}
       {error && <p className="card p-5 text-center text-sm text-destructive">Erro: {error.message}</p>}
       {data?.length === 0 && <p className="card p-5 text-center text-sm text-muted-foreground">Nenhum anúncio em aberto.</p>}
+      <div className="grade-cards">
       {[...(data ?? [])].sort((x, y) => Number(y.urgencia === "urgente") - Number(x.urgencia === "urgente")).map((a) => {
         const inicio = a.plantao ? new Date(a.plantao.inicio).getTime() : 0;
         return (
@@ -36,6 +37,7 @@ export function AnunciosSetor() {
           </div>
         );
       })}
+      </div>
     </section>
   );
 }

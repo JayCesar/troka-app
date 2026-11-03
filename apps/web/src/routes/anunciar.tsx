@@ -66,7 +66,8 @@ function Page() {
   };
 
   return (
-    <form className="space-y-5" onSubmit={submit}>
+    <form className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-8" onSubmit={submit}>
+      <div className="space-y-5">
       <label className="block space-y-2">
         <span className="text-sm font-semibold">1. Plantão que não poderá cumprir</span>
         <select className="field" value={plantao.id} onChange={(e) => setPlantaoId(e.target.value)}>
@@ -104,6 +105,9 @@ function Page() {
         )}
         <p className="text-xs text-muted-foreground">O motivo só é visto pela gestão do setor, nunca por outros profissionais.</p>
       </div>
+      </div>
+
+      <aside className="space-y-4 lg:sticky lg:top-24">
 
       {prazo && (
         <div className="card flex items-center gap-4 p-4">
@@ -117,6 +121,7 @@ function Page() {
 
       {erro && <p className="rounded-lg bg-destructive/10 p-3 text-sm font-medium text-destructive">{erro}</p>}
       <button className="btn btn-primary w-full" disabled={!urgencia || anunciar.isPending}>{anunciar.isPending ? "Publicando…" : "Publicar anúncio"}</button>
+      </aside>
     </form>
   );
 }

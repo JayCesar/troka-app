@@ -31,8 +31,8 @@ function Page() {
   if (error) return <p className="card p-6 text-center text-destructive">Erro ao carregar plantões: {error.message}</p>;
 
   return (
-    <div className="space-y-4">
-      {data?.length === 0 && <p className="card p-6 text-center text-muted-foreground">Nenhum plantão por aqui.</p>}
+    <div className="grade-cards">
+      {data?.length === 0 && <p className="card col-span-full p-6 text-center text-muted-foreground">Nenhum plantão por aqui.</p>}
       {data?.map((p) => (
         <PlantaoCard key={p.id} plantao={p}>
           {/* RN07: só antes do início; RN08: sem anúncio em aberto (o banco valida de novo) */}

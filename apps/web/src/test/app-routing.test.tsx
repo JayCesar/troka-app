@@ -14,4 +14,18 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it.each(["/inicio", "/cadastro", "/calendario", "/gestao/aprovacoes", "/gestao/anuncios", "/gestao/plantoes", "/gestao/equipe", "/gestao/historico"])("matches a page for %s", (path) => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    expect(router.matchRoutes(path).at(-1)?.routeId).toBe(path);
+  });
+});
+
+describe("Gestão", () => {
+  it("/gestao abre o hub (rota índice)", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    expect(router.matchRoutes("/gestao").at(-1)?.routeId).toBe("/gestao/");
+  });
 });

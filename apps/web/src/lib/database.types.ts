@@ -368,6 +368,61 @@ export type Database = {
           },
         ];
       };
+      pedido_acesso: {
+        Row: {
+          conselho: string | null;
+          criado_em: string;
+          email: string;
+          funcao: string;
+          hospital_id: string;
+          id: string;
+          nome: string;
+          resolvido_em: string | null;
+          resolvido_por: string | null;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          conselho?: string | null;
+          criado_em?: string;
+          email: string;
+          funcao: string;
+          hospital_id: string;
+          id?: string;
+          nome: string;
+          resolvido_em?: string | null;
+          resolvido_por?: string | null;
+          status?: string;
+        };
+        Update: {
+          conselho?: string | null;
+          criado_em?: string;
+          email?: string;
+          funcao?: string;
+          hospital_id?: string;
+          id?: string;
+          nome?: string;
+          resolvido_em?: string | null;
+          resolvido_por?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pedido_acesso_hospital_id_fkey";
+            columns: ["hospital_id"];
+            isOneToOne: false;
+            referencedRelation: "hospital";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pedido_acesso_resolvido_por_fkey";
+            columns: ["resolvido_por"];
+            isOneToOne: false;
+            referencedRelation: "perfil";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       perfil: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_profissional"] | null;
@@ -873,6 +928,13 @@ export type Database = {
           resumo: string;
         }[];
       };
+      hospitais_para_cadastro: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          nome: string;
+        }[];
+      };
       marcar_avisos_lidos: { Args: Record<PropertyKey, never>; Returns: undefined };
       minhas_solicitacoes: {
         Args: Record<PropertyKey, never>;
@@ -989,6 +1051,37 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      resolver_pedido_acesso: {
+        Args: { p_aprovar: boolean; p_pedido_id: string };
+        Returns: {
+          conselho: string | null;
+          criado_em: string;
+          email: string;
+          funcao: string;
+          hospital_id: string;
+          id: string;
+          nome: string;
+          resolvido_em: string | null;
+          resolvido_por: string | null;
+          status: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "pedido_acesso";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      solicitar_acesso: {
+        Args: {
+          p_conselho?: string;
+          p_email: string;
+          p_funcao: string;
+          p_hospital_id: string;
+          p_nome: string;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

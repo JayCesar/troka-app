@@ -40,7 +40,7 @@ function Page() {
       {(solicitacoes.data?.length ?? 0) > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-bold">Aguardando aprovação</h2>
-          {solicitacoes.data!.map((s) => <SolicitacaoCard key={s.id} s={s} />)}
+          <div className="grade-cards">{solicitacoes.data!.map((s) => <SolicitacaoCard key={s.id} s={s} />)}</div>
         </section>
       )}
 
@@ -49,7 +49,7 @@ function Page() {
         {ofertas.isLoading && <p className="card p-6 text-center text-muted-foreground">Carregando…</p>}
         {ofertas.error && <p className="card p-6 text-center text-destructive">Erro: {ofertas.error.message}</p>}
         {ofertas.data?.length === 0 && <p className="card p-6 text-center text-muted-foreground">Nenhum anúncio ou plantão em aberto.</p>}
-        {ofertas.data?.map((o) => <OfertaCard key={(o.anuncio_id ?? "") + o.plantao_id} o={o} />)}
+        <div className="grade-cards">{ofertas.data?.map((o) => <OfertaCard key={(o.anuncio_id ?? "") + o.plantao_id} o={o} />)}</div>
       </section>
     </div>
   );

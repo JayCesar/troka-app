@@ -13,6 +13,7 @@ export function Alertas() {
   return (
     <section className="space-y-3">
       <h2 className="flex items-center gap-2 text-lg font-bold text-warning"><AlertTriangle className="h-5 w-5" />Plantões em risco</h2>
+      <div className="grade-cards">
       {data.map((a) => {
         const inicio = a.plantao ? new Date(a.plantao.inicio).getTime() : 0;
         return (
@@ -27,6 +28,7 @@ export function Alertas() {
           </div>
         );
       })}
+      </div>
     </section>
   );
 }

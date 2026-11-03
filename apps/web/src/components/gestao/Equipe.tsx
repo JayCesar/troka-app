@@ -15,9 +15,9 @@ export function Equipe() {
         <p className="text-xs text-muted-foreground">Lista de confiança: trocas entre dois confiáveis e candidaturas de confiáveis são aprovadas automaticamente. Vale só para novas solicitações.</p>
       </div>
       {isLoading && <p className="card p-5 text-center text-sm text-muted-foreground">Carregando…</p>}
-      <ul className="card divide-y">
+      <ul className="grade-cards">
         {data?.map((m) => (
-          <li key={m.id} className="flex items-center gap-3 p-4 text-sm">
+          <li key={m.id} className="card flex items-center gap-3 p-4 text-sm">
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{m.nome}</p>
               <p className="text-xs text-muted-foreground">{m.categoria === "medico" ? "Médico" : "Enfermeiro"} · {m.especialidade} · {m.conselho}</p>
