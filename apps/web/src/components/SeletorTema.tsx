@@ -1,11 +1,11 @@
-import { Check, Moon, Palette, Sun } from "lucide-react";
+import { Check, Moon, Palette, Sparkles, Sun } from "lucide-react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TEMAS, useTema, type Tema } from "@/lib/tema";
 
-const ICONE: Record<Tema, typeof Sun> = { troka: Palette, branco: Sun, escuro: Moon };
+const ICONE: Record<Tema, typeof Sun> = { troka: Palette, branco: Sun, escuro: Moon, aurora: Sparkles };
 
-// Botão de tema (TroKa · Branco · Escuro). `className` ajusta o botão à superfície onde ele fica.
+// Botão de tema (TroKa · Branco · Escuro · Aurora). `className` ajusta o botão à superfície onde ele fica.
 export function SeletorTema({ className = "" }: { className?: string }) {
   const { tema, mudar } = useTema();
   const Atual = ICONE[tema];

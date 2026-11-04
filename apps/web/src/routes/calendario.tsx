@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -19,6 +19,7 @@ import { ChevronLeft, ChevronRight, GripVertical, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { FichaProfissional } from "@/components/gestao/FichaProfissional";
 import { useAuth } from "@/lib/auth";
 import { anuncioAtivo, useMeusPlantoes, usePlantoesSetor, type Plantao } from "@/lib/api/plantoes";
 import { moverPlantao } from "@/lib/services/agenda";
@@ -67,10 +68,11 @@ const lerAlvo = (id: string) => {
 };
 
 // ---------------------------------------------------------------------------
-// Visões (como no Google Calendar): 3 dias, semana, 15 dias e mês.
+// Visões (como no Google Calendar): dia, 3 dias, semana, 15 dias e mês.
 // ---------------------------------------------------------------------------
-type Visao = "3d" | "7d" | "15d" | "mes";
+type Visao = "1d" | "3d" | "7d" | "15d" | "mes";
 const VISOES: { id: Visao; label: string; dias: number }[] = [
+  { id: "1d", label: "Dia", dias: 1 },
   { id: "3d", label: "3 dias", dias: 3 },
   { id: "7d", label: "Semana", dias: 7 },
   { id: "15d", label: "15 dias", dias: 15 },
@@ -98,8 +100,12 @@ function deslocar(visao: Visao, ancora: Date, sentido: 1 | -1): Date {
 
 function tituloDoPeriodo(visao: Visao, ancora: Date, dias: Date[]): string {
   if (visao === "mes") return ancora.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  if (visao === "1d") return ancora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   return `${fmtDiaMes(dias[0]!)} – ${fmtDiaMes(dias.at(-1)!)} de ${dias.at(-1)!.getFullYear()}`;
 }
+
+// Gestor: clicar num plantão com profissional abre a ficha dele (evita prop drilling até o Cartao)
+const AbrirFicha = createContext<((id: string) => void) | null>(null);
 
 // Espelho da regra do banco (editar_plantao) só para UX; o banco é quem decide.
 const podeMover = (p: Plantao) => new Date(p.inicio).getTime() > Date.now() && !anuncioAtivo(p);
@@ -117,6 +123,10 @@ function Page() {
   const [ancora, setAncora] = useState(() => inicioDoDia(new Date()));
   const [arrastando, setArrastando] = useState<Plantao | null>(null);
   // Atualização otimista: posição nova enquanto o banco confirma; removida no sucesso (após refetch) ou no erro (reverte)
+  const [ficha, setFicha] = useState<string | null>(null);
+  // Ao soltar um arraste o navegador ainda dispara "click": ignora cliques logo após o fim do arraste
+  const fimArraste = useRef(0);
+  const abrirFicha = (id: string) => { if (Date.now() - fimArraste.current > 300) setFicha(id); };
   const [pendentes, setPendentes] = useState<Record<string, { inicio: string; fim: string }>>({});
 
   const dias = useMemo(() => diasDaVisao(visao, ancora), [visao, ancora]);
@@ -150,6 +160,7 @@ function Page() {
 
   const onDragEnd = async (e: DragEndEvent) => {
     setArrastando(null);
+    fimArraste.current = Date.now();
     const plantao = e.active.data.current?.["plantao"] as Plantao | undefined;
     if (!plantao || !e.over) return;
     const { inicio } = lerAlvo(String(e.over.id));
@@ -193,14 +204,14 @@ function Page() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button className="btn btn-outline min-h-10 px-4 text-sm" onClick={() => setAncora(inicioDoDia(new Date()))}>Hoje</button>
           <button className="btn btn-outline min-h-10 w-10 px-0" onClick={() => setAncora((a) => deslocar(visao, a, -1))} aria-label={`Período anterior (${rotuloVisao})`}><ChevronLeft className="h-4 w-4" /></button>
           <button className="btn btn-outline min-h-10 w-10 px-0" onClick={() => setAncora((a) => deslocar(visao, a, 1))} aria-label={`Próximo período (${rotuloVisao})`}><ChevronRight className="h-4 w-4" /></button>
-          <h2 className="ml-1 text-lg font-bold capitalize" aria-live="polite">{tituloDoPeriodo(visao, ancora, dias)}</h2>
+          <h2 className="basis-full text-lg font-bold first-letter:uppercase sm:ml-1 sm:basis-auto" aria-live="polite">{tituloDoPeriodo(visao, ancora, dias)}</h2>
         </div>
         {/* Filtro de período */}
-        <div role="group" aria-label="Período exibido" className="inline-flex rounded-full border bg-card p-1">
+        <div role="group" aria-label="Período exibido" className="inline-flex max-w-full overflow-x-auto rounded-full border bg-card p-1">
           {VISOES.map((v) => (
             <button
               key={v.id}
@@ -224,11 +235,12 @@ function Page() {
       {query.isLoading && <p className="card p-6 text-center text-muted-foreground">Carregando…</p>}
       {query.error && <p className="card p-6 text-center text-destructive">Erro: {query.error.message}</p>}
 
+      <AbrirFicha.Provider value={gestor ? abrirFicha : null}>
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        onDragCancel={() => setArrastando(null)}
+        onDragCancel={() => { setArrastando(null); fimArraste.current = Date.now(); }}
         accessibility={{
           announcements: anuncios,
           screenReaderInstructions: { draggable: "Pressione Espaço para pegar o plantão, use as setas para mover e Espaço para soltar. Esc cancela." },
@@ -281,6 +293,25 @@ function Page() {
               })}
             </div>
           </div>
+        ) : visao === "1d" ? (
+          /* Dia: um card largo com os dois turnos lado a lado no desktop */
+          <section aria-label={fmtDiaLongo(dias[0]!)} className={`card p-3 ${ymd(dias[0]!) === hoje ? "ring-2 ring-primary" : ""}`}>
+            <div className="grid gap-3 md:grid-cols-2">
+              {TURNOS.map((t) => {
+                const lista = porAlvo.get(alvoId(ymd(dias[0]!), t.id)) ?? [];
+                return (
+                  <Alvo key={t.id} id={alvoId(ymd(dias[0]!), t.id)} label={`${t.label} · ${pad(t.hora)}h`} ativo={gestor}>
+                    {lista.length === 0 && <p className="px-1 py-4 text-center text-sm text-muted-foreground">Sem plantões neste turno.</p>}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {lista.map((p) => (
+                        <Cartao key={p.id} plantao={p} arrastavel={gestor && podeMover(p) && !pendentes[p.id]} salvando={!!pendentes[p.id]} mostrarProfissional={gestor} grande />
+                      ))}
+                    </div>
+                  </Alvo>
+                );
+              })}
+            </div>
+          </section>
         ) : (
           /* Celular: um dia por linha. Desktop: 3 ou 7 colunas (15 dias quebra em linhas). */
           <div className={`grid gap-2 ${visao === "3d" ? "md:grid-cols-3" : "md:grid-cols-7"}`}>
@@ -314,6 +345,8 @@ function Page() {
         )}
         <DragOverlay dropAnimation={null}>{arrastando && <CartaoConteudo plantao={arrastando} mostrarProfissional={gestor} flutuando />}</DragOverlay>
       </DndContext>
+      </AbrirFicha.Provider>
+      {gestor && <FichaProfissional profissionalId={ficha} plantoes={plantoes} onClose={() => setFicha(null)} />}
     </div>
   );
 }
@@ -334,19 +367,28 @@ function Alvo({ id, label, ativo, compacto, children }: { id: string; label: str
   );
 }
 
-function Cartao({ plantao, arrastavel, salvando, mostrarProfissional, compacto }: { plantao: Plantao; arrastavel: boolean; salvando: boolean; mostrarProfissional: boolean; compacto?: boolean }) {
+function Cartao({ plantao, arrastavel, salvando, mostrarProfissional, compacto, grande }: { plantao: Plantao; arrastavel: boolean; salvando: boolean; mostrarProfissional: boolean; compacto?: boolean; grande?: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: plantao.id, data: { plantao }, disabled: !arrastavel });
+  const abrirFicha = useContext(AbrirFicha);
+  // Clique simples (sem arrastar: o MouseSensor só ativa após 6px) abre a ficha; Enter faz o mesmo pelo teclado
+  const abrir = abrirFicha && plantao.profissional_id ? () => abrirFicha(plantao.profissional_id!) : null;
+  const acao = abrir ? ". Enter abre a ficha do profissional" : "";
   return (
     <div
       ref={setNodeRef}
-      {...(arrastavel ? { ...listeners, ...attributes } : {})}
-      aria-label={`${arrastavel ? "Arrastar plantão " : "Plantão "}${rotulo(plantao)}`}
-      className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary ${arrastavel ? "cursor-grab touch-none transition-shadow hover:shadow-md active:cursor-grabbing" : ""} ${isDragging ? "opacity-40" : ""} ${salvando ? "animate-pulse" : ""}`}
+      {...(arrastavel ? { ...listeners, ...attributes } : abrir ? { role: "button", tabIndex: 0 } : {})}
+      onClick={abrir ?? undefined}
+      onKeyDown={(e) => {
+        if (abrir && e.key === "Enter") { e.preventDefault(); abrir(); return; }
+        if (arrastavel) listeners?.["onKeyDown"]?.(e);
+      }}
+      aria-label={`${arrastavel ? "Arrastar plantão " : "Plantão "}${rotulo(plantao)}${acao}`}
+      className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary ${arrastavel ? "cursor-grab touch-none transition-shadow hover:shadow-md active:cursor-grabbing" : abrir ? "cursor-pointer transition-shadow hover:shadow-md" : ""} ${isDragging ? "opacity-40" : ""} ${salvando ? "animate-pulse" : ""}`}
     >
       {compacto ? (
         <CartaoCompacto plantao={plantao} mostrarProfissional={mostrarProfissional} />
       ) : (
-        <CartaoConteudo plantao={plantao} mostrarProfissional={mostrarProfissional} travado={mostrarProfissional && !arrastavel && !salvando} />
+        <CartaoConteudo plantao={plantao} mostrarProfissional={mostrarProfissional} travado={mostrarProfissional && !arrastavel && !salvando} grande={!!grande} />
       )}
     </div>
   );
@@ -364,12 +406,12 @@ function CartaoCompacto({ plantao, mostrarProfissional }: { plantao: Plantao; mo
   );
 }
 
-function CartaoConteudo({ plantao, mostrarProfissional, travado, flutuando }: { plantao: Plantao; mostrarProfissional: boolean; travado?: boolean; flutuando?: boolean }) {
+function CartaoConteudo({ plantao, mostrarProfissional, travado, flutuando, grande }: { plantao: Plantao; mostrarProfissional: boolean; travado?: boolean; flutuando?: boolean; grande?: boolean }) {
   const anuncio = anuncioAtivo(plantao);
   const cor = anuncio ? "border-warning bg-warning/10" : plantao.profissional_id ? "border-primary bg-primary/10" : "border-border bg-secondary";
   const i = new Date(plantao.inicio).getTime();
   return (
-    <div className={`flex items-start gap-1 rounded-md border-l-4 p-1.5 text-xs ${cor} ${flutuando ? "shadow-lg ring-2 ring-primary" : ""}`}>
+    <div className={`flex items-start gap-1 rounded-md border-l-4 ${grande ? "p-3 text-sm" : "p-1.5 text-xs"} ${cor} ${flutuando ? "shadow-lg ring-2 ring-primary" : ""}`}>
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold">{plantao.especialidade?.nome}</p>
         <p>{fmtTime(i)}–{fmtTime(new Date(plantao.fim).getTime())}</p>

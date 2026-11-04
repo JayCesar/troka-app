@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarRange, ClipboardCheck, History, Megaphone, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, CalendarRange, ClipboardCheck, History, Megaphone, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Alertas } from "@/components/gestao/Alertas";
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/gestao/")({
   component: () => <AppShell title="Gestão" role="gestor"><Hub /></AppShell>,
 });
 
-type Destino = "/gestao/aprovacoes" | "/gestao/anuncios" | "/gestao/plantoes" | "/gestao/equipe" | "/gestao/historico";
+type Destino = "/gestao/aprovacoes" | "/gestao/anuncios" | "/gestao/plantoes" | "/gestao/equipe" | "/gestao/confianca" | "/gestao/historico";
 interface Opcao { to: Destino; titulo: string; descricao: string; icon: LucideIcon; cor: string; contador?: number | undefined; rotuloContador: string }
 
 const soma = (...n: (number | undefined)[]) => (n.every((x) => x === undefined) ? undefined : n.reduce<number>((a, x) => a + (x ?? 0), 0));
@@ -41,6 +41,8 @@ function Hub() {
       contador: plantoes.data?.length, rotuloContador: "futuros" },
     { to: "/gestao/equipe", titulo: "Equipe do setor", descricao: "Profissionais, lista de confiança e cadastro com convite.", icon: Users, cor: "#22d3ee",
       contador: equipe.data?.length, rotuloContador: "pessoas" },
+    { to: "/gestao/confianca", titulo: "Lista de confiança", descricao: "Quem tem troca e candidatura aprovadas automaticamente (RN19b).", icon: ShieldCheck, cor: "#22c55e",
+      contador: equipe.data?.filter((m) => m.confiavel).length, rotuloContador: "na lista" },
     { to: "/gestao/historico", titulo: "Histórico do setor", descricao: "Tudo o que mudou, imutável, com exportação CSV.", icon: History, cor: "#8b5cf6", rotuloContador: "" },
   ];
 
@@ -48,7 +50,7 @@ function Hub() {
     <div className="space-y-8">
       <Painel />
       <Alertas />
-      <section aria-label="Áreas da gestão" className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <section aria-label="Áreas da gestão" className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         {opcoes.map((o) => (
           <Link key={o.to} to={o.to} className="card-escuro group">
             <span className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: `color-mix(in oklab, ${o.cor} 18%, transparent)`, color: o.cor }}>

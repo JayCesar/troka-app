@@ -20,6 +20,7 @@ import { Route as PlantoesRouteImport } from './routes/plantoes'
 import { Route as GestaoIndexRouteImport } from './routes/gestao.index'
 import { Route as GestaoAnunciosRouteImport } from './routes/gestao.anuncios'
 import { Route as GestaoAprovacoesRouteImport } from './routes/gestao.aprovacoes'
+import { Route as GestaoConfiancaRouteImport } from './routes/gestao.confianca'
 import { Route as GestaoEquipeRouteImport } from './routes/gestao.equipe'
 import { Route as GestaoHistoricoRouteImport } from './routes/gestao.historico'
 import { Route as GestaoPlantoesRouteImport } from './routes/gestao.plantoes'
@@ -79,6 +80,11 @@ const GestaoAprovacoesRoute = GestaoAprovacoesRouteImport.update({
   path: '/gestao/aprovacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GestaoConfiancaRoute = GestaoConfiancaRouteImport.update({
+  id: '/gestao/confianca',
+  path: '/gestao/confianca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GestaoEquipeRoute = GestaoEquipeRouteImport.update({
   id: '/gestao/equipe',
   path: '/gestao/equipe',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/plantoes': typeof PlantoesRoute
   '/gestao/anuncios': typeof GestaoAnunciosRoute
   '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/confianca': typeof GestaoConfiancaRoute
   '/gestao/equipe': typeof GestaoEquipeRoute
   '/gestao/historico': typeof GestaoHistoricoRoute
   '/gestao/plantoes': typeof GestaoPlantoesRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/plantoes': typeof PlantoesRoute
   '/gestao/anuncios': typeof GestaoAnunciosRoute
   '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/confianca': typeof GestaoConfiancaRoute
   '/gestao/equipe': typeof GestaoEquipeRoute
   '/gestao/historico': typeof GestaoHistoricoRoute
   '/gestao/plantoes': typeof GestaoPlantoesRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/plantoes': typeof PlantoesRoute
   '/gestao/anuncios': typeof GestaoAnunciosRoute
   '/gestao/aprovacoes': typeof GestaoAprovacoesRoute
+  '/gestao/confianca': typeof GestaoConfiancaRoute
   '/gestao/equipe': typeof GestaoEquipeRoute
   '/gestao/historico': typeof GestaoHistoricoRoute
   '/gestao/plantoes': typeof GestaoPlantoesRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/plantoes'
     | '/gestao/anuncios'
     | '/gestao/aprovacoes'
+    | '/gestao/confianca'
     | '/gestao/equipe'
     | '/gestao/historico'
     | '/gestao/plantoes'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/plantoes'
     | '/gestao/anuncios'
     | '/gestao/aprovacoes'
+    | '/gestao/confianca'
     | '/gestao/equipe'
     | '/gestao/historico'
     | '/gestao/plantoes'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/plantoes'
     | '/gestao/anuncios'
     | '/gestao/aprovacoes'
+    | '/gestao/confianca'
     | '/gestao/equipe'
     | '/gestao/historico'
     | '/gestao/plantoes'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   PlantoesRoute: typeof PlantoesRoute
   GestaoAnunciosRoute: typeof GestaoAnunciosRoute
   GestaoAprovacoesRoute: typeof GestaoAprovacoesRoute
+  GestaoConfiancaRoute: typeof GestaoConfiancaRoute
   GestaoEquipeRoute: typeof GestaoEquipeRoute
   GestaoHistoricoRoute: typeof GestaoHistoricoRoute
   GestaoPlantoesRoute: typeof GestaoPlantoesRoute
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GestaoAprovacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gestao/confianca': {
+      id: '/gestao/confianca'
+      path: '/gestao/confianca'
+      fullPath: '/gestao/confianca'
+      preLoaderRoute: typeof GestaoConfiancaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gestao/equipe': {
       id: '/gestao/equipe'
       path: '/gestao/equipe'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlantoesRoute: PlantoesRoute,
   GestaoAnunciosRoute: GestaoAnunciosRoute,
   GestaoAprovacoesRoute: GestaoAprovacoesRoute,
+  GestaoConfiancaRoute: GestaoConfiancaRoute,
   GestaoEquipeRoute: GestaoEquipeRoute,
   GestaoHistoricoRoute: GestaoHistoricoRoute,
   GestaoPlantoesRoute: GestaoPlantoesRoute,

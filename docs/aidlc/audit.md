@@ -145,3 +145,59 @@
   - `tsc` limpo, vitest 10/10, build ok;
   - smoke test via REST: anon envia (204) e não lê a tabela (42501).
 - Pendente: SMTP real para convites fora do ambiente local (decisão de provedor).
+
+## 2026-11-03T20:40:00Z — M4 (Notificações sobrepostas, ficha do profissional, visão Dia, IA no Início, fundo do chat) — plano aprovado
+- Decisões:
+  - Notificações viraram popover sobreposto ao sino (`z-50`), que fecha com clique fora ou Esc; o cabeçalho não cresce mais.
+  - Ficha do profissional (calendário, só gestor) sem RPC nova: usa `equipe_do_setor` + plantões já carregados. A RLS `perfil_select_mesmo_setor` (RN03/RN30) limita ao setor.
+    - Abre com clique simples (o arraste só ativa após 6px) ou Enter.
+    - Espaço continua pegando o plantão para arrastar.
+    - Cliques até 300ms após um arraste são ignorados.
+  - Visão "Dia" (`1d`) no calendário em lista de cards por turno, alternativa à régua de horas. Clicar numa data continua abrindo 3 dias.
+  - Início: a prévia do chat virou `ConversaDemo`, com conversa roteirizada em loop (3 trocas por papel).
+    - Efeitos: pensando com brilho, resposta digitada, cartões de resultado e borda com gradiente girando.
+    - Decorativa (`aria-hidden`); respeita `prefers-reduced-motion`.
+  - Fundo do chat (5 opções) só na área de mensagens, salvo em `localStorage` com try/catch. Migration no `perfil` descartada: o recurso é cosmético.
+- Sem migration: nenhuma regra de negócio nova.
+- Verificação: `tsc` limpo, vitest 10/10, build ok. Ainda não visto no navegador.
+- Dúvida respondida: e-mail local vai para o Mailpit, porque `[auth.email.smtp]` está desativado. Na nuvem é preciso SMTP próprio, pois o SMTP padrão do Supabase só envia para membros do time e tem limite baixo.
+- Ajuste M4 (feedback visual): a prévia ganhou espaço e efeitos.
+  - Espaço: grade do hero `1fr / 1.15fr` e altura de 26–30rem.
+  - Efeitos: halo pulsando, selos flutuantes, inclinação 3D com holofote, status "pensando/digitando/online" no cabeçalho, progresso do roteiro, varredura sob o cabeçalho e mensagens surgindo com desfoque.
+  - Continua decorativa e respeita `prefers-reduced-motion`.
+- Ajuste M4: novo card "Lista de confiança" no hub da gestão, com a subpágina `/gestao/confianca` (RN19b).
+  - Mostra a contagem, uma busca por nome, especialidade ou CRM/COREN e dois grupos, "Na lista" e "Demais", com Adicionar/Remover.
+  - Usa a RPC `definir_confianca`, que já existia e já tem teste pgTAP; nenhuma RPC nova.
+  - O aviso da RN19c fica explícito na tela: a mudança vale só para solicitações futuras.
+  - O checkbox em Equipe continua.
+- Ajuste M4:
+  - "Confiança" (`/gestao/confianca`) entrou no menu principal do gestor (topo no desktop, abas no celular, atalhos do Início).
+  - No fundo "Noite" do chat, o aviso do sistema passou a usar texto branco, porque estava ilegível.
+- Ajuste M4 (prévia do Início e chat):
+  - Os selos da prévia saíram de fora do card e entraram nele, abaixo do cabeçalho, sem sobrepor as mensagens.
+  - O campo da prévia virou input real: Enter ou o botão abre o assistente com o texto digitado. Só a conversa animada continua `aria-hidden`.
+  - O chat ganhou o fundo "Aurora TroKa", igual ao da prévia (navy com brilhos verde-água).
+  - Nos fundos escuros (Aurora e Noite), os balões passam a ser translúcidos com texto branco.
+- Ajuste M4 (chat e cabeçalho):
+  - O cabeçalho do chat ganhou o avatar com indicador pulsante e uma linha de status que mostra "digitando…" com brilho, igual à prévia.
+  - Com fundo escuro (Aurora/Noite), o fundo passa a cobrir o painel inteiro: cabeçalho, mensagens e campo de texto, com bordas e textos claros e o X e os botões em branco (`.chat-escuro`).
+  - O texto do cabeçalho do app (nome · setor · hospital + título) agora também leva ao `/inicio`, como o logo.
+- Ajuste M4 (responsividade): verificado com capturas headless em 360, 768 e 1024px (gestor e profissional, 22 telas por largura) e medição de estouro horizontal.
+  - Menu do topo só a partir de `lg` (1024px); abaixo disso ficam as abas no rodapé. Em 768px o título era espremido e, no profissional, a página estourava para 832px.
+  - Rodapé com rótulo curto ("Plantões"), em uma linha só.
+  - `pb-40` no mobile, para o FAB não cobrir o fim do conteúdo.
+  - Calendário: o título vai para uma linha própria no celular, e o "De" maiúsculo foi corrigido (`first-letter` no lugar de `capitalize`). Filtro de visões com rolagem se faltar espaço.
+  - Lista de confiança: o banner virou grade, as colunas ganharam `min-w-0` (no celular iam até 487px) e os botões mostram só o ícone no celular.
+  - Prévia da IA no Início só a partir de `xl`. Chat: placeholder curto e padding do cabeçalho ajustado.
+  - Resultado: 0 estouros horizontais em 66 capturas. `tsc` e build ok.
+- **Tema Aurora (4º tema)**: visual da prévia de IA (navy com brilhos verde-água e vidro) aplicado ao site inteiro, ao lado de TroKa, Branco e Escuro. A escolha foi manter o Escuro, que é mais sóbrio, e oferecer o Aurora como opção.
+  - `lib/tema.ts`, `index.html` (aplica o tema antes do React), `SeletorTema` (ícone ✨).
+  - `styles.css`: bloco `[data-theme="aurora"]` com tokens próprios. O fundo é um `body::before` fixo, porque `background-attachment` não funciona no iOS. `card`, `card-escuro` e `btn-primary` leem as variáveis opcionais `--superficie-card`, `--sombra-card`, `--superficie-escura` e `--fundo-primario`, com fallback, então os outros temas não mudam. A variante `dark:` também passa a valer no Aurora.
+  - Contraste: texto principal sólido e secundário com 68% de branco. Desfoque só em cabeçalho, barra de abas, modais e menus; os cards são só translúcidos, para poupar desempenho no celular.
+  - Chat: com o Aurora ativo, o fundo "Padrão" da conversa vira Aurora (`useTemaAtivo`, via MutationObserver). Uma escolha explícita no seletor continua valendo.
+  - Só front, sem regra de negócio. Verificado com 66 capturas em 360, 768 e 1024px e mais 44 em 360 e 1280px. `tsc`, vitest e build ok.
+  - Ajustes após teste:
+    - Painel de notificações sólido (`bg-popover` com desfoque) no lugar do `card` translúcido.
+    - O desfoque do cabeçalho foi para um `::before`, porque `backdrop-filter` no `header` virava containing block dos filhos `fixed` e o painel saía da tela no celular.
+    - `<select>` e `<option>` com fundo sólido no Aurora, já que a lista nativa não aceita fundo translúcido.
+    - Cabeçalho: o título da página deixou de ser link, porque clicar em "Anunciar plantão" levava ao Início. No lugar, um link visível "← Início" aparece fora do Início.

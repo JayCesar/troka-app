@@ -3,6 +3,7 @@ import { Bot, Maximize2, Minimize2, Send, Sparkles } from "lucide-react";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { BotaoMicrofone, IndicadorGravacao } from "@/components/BotaoMicrofone";
+import { SeletorFundoChat, useFundoChat } from "@/components/FundoChat";
 import { useGravacaoAudio } from "@/hooks/use-gravacao-audio";
 import { enviarAoAssistente, transcreverAudio, type MensagemChat } from "@/lib/services/assistente";
 import { fmtTime } from "@/lib/format";
@@ -32,6 +33,7 @@ export function useAssistente() {
 export function AssistenteProvider({ children }: { children: ReactNode }) {
   const [aberto, setAberto] = useState(false);
   const [maximizado, setMaximizado] = useState(false); // desktop: chat em tela cheia
+  const { fundo, escolher: escolherFundo } = useFundoChat();
   const [mensagens, setMensagens] = useState<MensagemChat[]>([BOAS_VINDAS]);
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -109,16 +111,34 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
           <button
             type="button"
             aria-label="Abrir assistente de IA"
-            className="fixed bottom-20 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/40 md:bottom-6"
+            className="fixed bottom-20 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/40 lg:bottom-6"
           >
             <Sparkles className="h-6 w-6" aria-hidden />
           </button>
         </SheetTrigger>
 
-        <SheetContent side="right" className={`flex w-full flex-col gap-0 p-0 transition-[max-width] duration-200 ${maximizado ? "sm:max-w-none" : "sm:max-w-md"}`}>
-          <SheetHeader className="border-b p-4 pr-24 text-left">
-            <SheetTitle className="flex items-center gap-2"><Bot className="h-5 w-5 text-primary" aria-hidden />Assistente TroKa</SheetTitle>
-            <SheetDescription>Escreva ou toque no microfone para falar.</SheetDescription>
+        {/* Fundo escuro (Aurora/Noite): o painel inteiro usa o fundo, como a prévia do Início */}
+        <SheetContent
+          side="right"
+          style={fundo.escuro ? fundo.style : undefined}
+          className={`flex w-full flex-col gap-0 p-0 transition-[max-width] duration-200 ${maximizado ? "sm:max-w-none" : "sm:max-w-md"} ${fundo.escuro ? "chat-escuro border-white/10 text-white" : ""}`}
+        >
+          <SheetHeader className={`border-b p-4 pr-24 text-left sm:pr-32 ${fundo.escuro ? "border-white/10" : ""}`}>
+            <SheetTitle className="flex items-center gap-3">
+              <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary/40 to-primary/10 text-primary ring-1 ring-primary/40">
+                <Bot className="h-5 w-5" aria-hidden />
+                <span aria-hidden className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-ping rounded-full bg-primary/70" />
+                <span aria-hidden className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
+              </span>
+              <span className="min-w-0">
+                <span className={`block ${fundo.escuro ? "text-white" : ""}`}>Assistente TroKa</span>
+                <SheetDescription asChild>
+                  <span className={`block text-xs font-normal ${enviando ? "texto-ia" : fundo.escuro ? "text-white/60" : ""}`}>
+                    {enviando ? "digitando…" : "Escreva ou toque no microfone para falar."}
+                  </span>
+                </SheetDescription>
+              </span>
+            </SheetTitle>
             {/* Só no desktop: no celular o chat já ocupa a tela toda.
                 O header NÃO pode ser `relative`: ele cobriria o X (que vem antes no DOM) e bloquearia o clique. */}
             <button
@@ -127,23 +147,28 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
               aria-pressed={maximizado}
               aria-label={maximizado ? "Restaurar tamanho do chat" : "Maximizar chat"}
               title={maximizado ? "Restaurar" : "Maximizar"}
-              className="absolute right-12 top-3 z-10 hidden h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid"
+              className="acao-chat absolute right-12 top-3 z-10 hidden h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid"
             >
               {maximizado ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
             </button>
+            <SeletorFundoChat atual={fundo.id} onEscolher={escolherFundo} className="absolute right-12 top-3 z-10 sm:right-20" />
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto p-4" role="log" aria-live="polite" aria-label="Mensagens do chat">
+          <div className="flex-1 overflow-y-auto p-4 transition-[background] duration-300" style={fundo.escuro ? undefined : fundo.style} role="log" aria-live="polite" aria-label="Mensagens do chat">
           <div className={`space-y-3 ${maximizado ? "mx-auto max-w-4xl" : ""}`}>
             {mensagens.map((m) => (
               <div key={m.id} className={`flex ${m.autor === "usuario" ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     m.autor === "usuario"
-                      ? "rounded-br-sm bg-primary text-primary-foreground"
+                      ? `rounded-br-sm bg-primary text-primary-foreground ${fundo.escuro ? "bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20" : ""}`
                       : m.autor === "sistema"
-                        ? "border border-warning/40 bg-warning/10 text-foreground"
-                        : "rounded-bl-sm bg-secondary text-secondary-foreground"
+                        ? fundo.escuro
+                          ? "border border-warning/60 bg-warning/20 text-white"
+                          : "border border-warning/40 bg-warning/10 text-foreground"
+                        : fundo.escuro
+                          ? "rounded-bl-sm border border-white/10 bg-white/10 text-white shadow-lg backdrop-blur-sm"
+                          : "rounded-bl-sm bg-secondary text-secondary-foreground"
                   }`}
                 >
                   <span className="sr-only">{m.autor === "usuario" ? "Você" : m.autor === "sistema" ? "Aviso" : "Assistente"}: </span>
@@ -152,12 +177,12 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
                 </div>
               </div>
             ))}
-            {enviando && <p className="text-xs text-muted-foreground">Assistente digitando…</p>}
+            {enviando && <p className={`text-xs ${fundo.escuro ? "text-white/70" : "text-muted-foreground"}`}>Assistente digitando…</p>}
             <div ref={fimRef} />
           </div>
           </div>
 
-          <form onSubmit={enviar} className="border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <form onSubmit={enviar} className={`border-t ${fundo.escuro ? "border-white/10" : ""} p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]`}>
             <div className={`flex items-end gap-2 ${maximizado ? "mx-auto max-w-4xl" : ""}`}>
             {voz.gravando ? (
               <IndicadorGravacao segundos={voz.segundos} texto={texto} />
@@ -167,8 +192,8 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
                 <textarea
                   id="assistente-mensagem"
                   rows={1}
-                  className="field max-h-32 min-h-12 flex-1 resize-none py-3"
-                  placeholder={voz.estado === "processando" ? "Transcrevendo áudio…" : "Escreva ou fale sua mensagem…"}
+                  className={`field max-h-32 min-h-12 flex-1 resize-none py-3 ${fundo.escuro ? "border-white/10 bg-white/5 text-white placeholder:text-white/45 focus:border-primary" : ""}`}
+                  placeholder={voz.estado === "processando" ? "Transcrevendo áudio…" : "Escreva ou fale…"}
                   value={texto}
                   onChange={(e) => setTexto(e.target.value)}
                   onKeyDown={(e) => {

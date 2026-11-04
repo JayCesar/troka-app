@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { AppShell, acoesDe } from "@/components/AppShell";
 import { useAssistente } from "@/components/AssistenteIA";
 import { BotaoMicrofone, IndicadorGravacao } from "@/components/BotaoMicrofone";
+import { ConversaDemo } from "@/components/inicio/ConversaDemo";
 import { moverHolofote, useRotativo } from "@/components/inicio/efeitos";
 import { PanoramaGestor, PanoramaProfissional } from "@/components/inicio/Panorama";
 import { AtividadeGestor, AtividadeProfissional } from "@/components/inicio/Atividade";
@@ -30,12 +31,6 @@ const atraso = (ms: number) => ({ "--atraso": `${ms}ms` }) as CSSProperties;
 const saudacao = () => {
   const h = new Date().getHours();
   return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
-};
-
-// Prévia ilustrativa do chat (decorativa) no destaque do assistente
-const PREVIA: Record<"gestor" | "profissional", [string, string]> = {
-  gestor: ["Quem pode cobrir o noturno de sexta?", "3 pessoas da Clínica Médica têm descanso suficiente. Quer que eu mostre?"],
-  profissional: ["Posso assumir o plantão de sábado?", "Pode sim: você terá 14h de descanso antes. Quer que eu abra o anúncio?"],
 };
 
 const SECOES: ItemSecao[] = [
@@ -88,7 +83,7 @@ function Inicio() {
       <div className="entrar relative flex flex-1 items-center overflow-hidden rounded-3xl border border-navy-foreground/10 bg-navy p-6 text-navy-foreground md:p-10">
         <div aria-hidden className="flutuar pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/25 blur-3xl" />
         <div aria-hidden className="flutuar pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-primary/10 blur-3xl [animation-delay:-7s]" />
-        <div className="relative grid w-full items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+        <div className="relative grid w-full items-center gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] xl:gap-14">
         <div className="max-w-2xl space-y-4">
           <span className="entrar inline-flex items-center gap-1.5 rounded-full border border-primary/50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary" style={atraso(80)}>
             <Sparkles className="h-3.5 w-3.5 animate-pulse" aria-hidden />Assistente TroKa
@@ -142,19 +137,8 @@ function Inicio() {
           </div>
         </div>
 
-        {/* Prévia do chat (ilustrativa), só no desktop */}
-        <div aria-hidden className="hidden space-y-3 lg:block">
-          <div className="entrar ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground shadow-lg" style={atraso(500)}>
-            {PREVIA[papel][0]}
-          </div>
-          <div className="entrar flex items-end gap-2" style={atraso(900)}>
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy-foreground/10 text-primary"><Bot className="h-4 w-4" /></span>
-            <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-navy-foreground/10 bg-navy-foreground/10 px-4 py-2.5 text-sm shadow-lg">{PREVIA[papel][1]}</div>
-          </div>
-          <div className="entrar flex items-center gap-1 pl-10" style={atraso(1300)}>
-            {[0, 150, 300].map((d) => <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-navy-foreground/50" style={{ animationDelay: `${d}ms` }} />)}
-          </div>
-        </div>
+        {/* Prévia do chat (ilustrativa, em loop), só no desktop */}
+        <ConversaDemo papel={papel} onPerguntar={(t) => abrir(t)} />
         </div>
       </div>
       <ProximaSecao para="panorama" label="Veja seu panorama" />

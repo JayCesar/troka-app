@@ -2,7 +2,8 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is([data-theme="escuro"] *));
+@custom-variant dark (&:is([data-theme="escuro"] *, [data-theme="aurora"] *));
+@custom-variant tema-aurora (&:is([data-theme="aurora"] *));
 /* Tema Branco: superfícies "navy" ficam brancas (usado para trocar o logo com texto claro/escuro) */
 @custom-variant tema-branco (&:is([data-theme="branco"] *));
 
@@ -114,6 +115,46 @@
   --grafico-grade: color-mix(in oklab, var(--brand-white) 8%, transparent);
 }
 
+/* Tema Aurora: navy com brilhos verde-água fixos no fundo e superfícies de vidro (visual da prévia de IA).
+ * Texto principal sólido e secundário ≥ 68% de branco para manter contraste AA sobre o gradiente.
+ * Desfoque só em cabeçalho, modais, menus e chat (custo em celular); cards são só translúcidos. */
+:root[data-theme="aurora"] {
+  color-scheme: dark;
+  --navy: color-mix(in oklab, var(--brand-navy) 55%, transparent);
+  --background: var(--brand-navy);
+  --foreground: color-mix(in oklab, var(--brand-white) 96%, var(--brand-accent));
+  --card: color-mix(in oklab, var(--brand-white) 6%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: color-mix(in oklab, #0a2140 94%, transparent);
+  --popover-foreground: var(--foreground);
+  --secondary: color-mix(in oklab, var(--brand-white) 10%, transparent);
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--brand-white) 7%, transparent);
+  --muted-foreground: color-mix(in oklab, var(--brand-white) 68%, transparent);
+  --accent: color-mix(in oklab, var(--brand-accent) 22%, transparent);
+  --accent-foreground: color-mix(in oklab, var(--brand-accent) 45%, var(--brand-white));
+  --border: color-mix(in oklab, var(--brand-white) 12%, transparent);
+  --input: color-mix(in oklab, var(--brand-white) 16%, transparent);
+  --grafico-alerta: #c08420;
+  --grafico-grade: color-mix(in oklab, var(--brand-white) 8%, transparent);
+  /* superfícies específicas do tema (lidas pelos utilitários abaixo, com fallback nos outros temas) */
+  --superficie-card: linear-gradient(160deg, color-mix(in oklab, var(--brand-white) 8%, transparent), color-mix(in oklab, var(--brand-white) 3%, transparent));
+  --sombra-card: inset 0 1px 0 color-mix(in oklab, var(--brand-white) 8%, transparent), 0 12px 32px -18px black;
+  --fundo-primario: linear-gradient(135deg, color-mix(in oklab, var(--brand-accent) 85%, white), var(--brand-accent) 55%, color-mix(in oklab, var(--brand-accent) 80%, var(--brand-navy)));
+  --superficie-escura: linear-gradient(160deg, color-mix(in oklab, var(--brand-white) 9%, transparent), color-mix(in oklab, var(--brand-white) 3%, transparent));
+  background: var(--brand-navy);
+}
+/* Brilhos fixos atrás de tudo (pseudo-elemento fixo: funciona também no iOS, ao contrário de background-attachment) */
+:root[data-theme="aurora"] body { background: transparent; }
+:root[data-theme="aurora"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(circle at 88% 4%, color-mix(in oklab, var(--brand-accent) 30%, transparent), transparent 40%),
+    radial-gradient(circle at 4% 96%, color-mix(in oklab, var(--brand-accent) 18%, transparent), transparent 46%),
+    radial-gradient(circle at 50% 55%, color-mix(in oklab, var(--brand-accent) 6%, transparent), transparent 60%),
+    linear-gradient(165deg, #031334 0%, #061d3d 55%, #0a2b45 100%);
+}
+
 @layer base {
   * { border-color: var(--color-border); }
   body {
@@ -135,7 +176,7 @@
   &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 @utility btn-primary {
-  background: var(--primary); color: var(--primary-foreground);
+  background: var(--fundo-primario, var(--primary)); color: var(--primary-foreground);
   box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--primary) 70%, transparent);
   &:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 8px 22px -8px color-mix(in oklab, var(--primary) 85%, transparent); }
 }
@@ -148,9 +189,9 @@
   &:hover:not(:disabled) { background: color-mix(in oklab, var(--destructive) 20%, transparent); }
 }
 @utility card {
-  background: var(--card); color: var(--card-foreground);
+  background: var(--superficie-card, var(--card)); color: var(--card-foreground);
   border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px);
-  box-shadow: 0 1px 2px color-mix(in oklab, var(--brand-navy) 6%, transparent);
+  box-shadow: var(--sombra-card, 0 1px 2px color-mix(in oklab, var(--brand-navy) 6%, transparent));
 }
 @utility field {
   width: 100%; min-height: 3rem; padding: 0 0.875rem; border-radius: var(--radius);
@@ -168,7 +209,7 @@
 @utility card-escuro {
   display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem;
   min-height: 15rem; border-radius: 1.25rem;
-  background: color-mix(in oklab, var(--brand-navy) 88%, var(--brand-white));
+  background: var(--superficie-escura, color-mix(in oklab, var(--brand-navy) 88%, var(--brand-white)));
   border: 1px solid color-mix(in oklab, var(--brand-white) 10%, transparent);
   color: var(--brand-white);
   box-shadow: 0 10px 30px -12px color-mix(in oklab, black 60%, transparent);
@@ -214,6 +255,64 @@
   animation: trocar-texto 400ms ease-out both;
   @media (prefers-reduced-motion: reduce) { animation: none; }
 }
+/* ---- Efeitos de IA (prévia da conversa no Início) ---- */
+@property --angulo-ia { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes girar-ia { to { --angulo-ia: 360deg; } }
+/* Borda com gradiente girando (cor da marca) */
+@utility borda-ia {
+  position: relative; isolation: isolate;
+  &::after {
+    content: ""; position: absolute; inset: -1px; z-index: 1; pointer-events: none; border-radius: inherit; padding: 1px;
+    background: conic-gradient(from var(--angulo-ia), transparent 0deg, var(--primary) 80deg, transparent 160deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: girar-ia 4s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { &::after { animation: none; } }
+}
+@keyframes brilho-ia { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+/* Texto "pensando…" com brilho passando */
+@utility texto-ia {
+  background: linear-gradient(90deg, currentColor 0%, var(--primary) 50%, currentColor 100%) 0 0 / 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: brilho-ia 2s linear infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; color: inherit; background: none; }
+}
+@keyframes piscar { 50% { opacity: 0; } }
+@utility cursor-ia {
+  &::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em; background: currentColor; animation: piscar 900ms steps(1) infinite; }
+}
+
+/* Mensagem surgindo: sobe, desfoca → nítida */
+@keyframes surgir-ia {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@utility surgir-ia {
+  animation: surgir-ia 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--atraso, 0ms);
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+/* Halo pulsando atrás do card */
+@keyframes halo-ia { 0%, 100% { opacity: 0.45; transform: scale(0.96); } 50% { opacity: 0.8; transform: scale(1.03); } }
+@utility halo-ia {
+  animation: halo-ia 6s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+/* Selos flutuando ao redor do card */
+@keyframes boiar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@utility boiar {
+  animation: boiar 5s ease-in-out infinite;
+  animation-delay: var(--atraso, 0ms);
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+/* Linha de "varredura" sob o cabeçalho enquanto a IA pensa */
+@keyframes varrer { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@utility varredura-ia {
+  position: relative; overflow: hidden;
+  &::after { content: ""; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: varrer 1.4s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { &::after { animation: none; opacity: 0; } }
+}
+
 /* Luz que segue o mouse (vars --mx/--my definidas no onMouseMove) */
 @utility holofote {
   position: relative; isolation: isolate;
@@ -227,3 +326,13 @@
 
 /* Seções em tela cheia do Início: animações de entrada só rodam quando a seção aparece */
 [data-secao]:not([data-visivel]) .entrar { animation-play-state: paused; }
+
+/* Chat com fundo escuro (Aurora/Noite): X do Sheet e botões do cabeçalho em branco */
+.chat-escuro > button, .chat-escuro .acao-chat { color: rgb(255 255 255 / 0.75); background: transparent; }
+.chat-escuro > button:hover, .chat-escuro .acao-chat:hover { color: #fff; background: rgb(255 255 255 / 0.1); }
+
+/* Aurora: modais, menus e notificações com vidro fosco */
+[data-theme="aurora"] :is([role="dialog"], [role="menu"], [data-radix-popper-content-wrapper] > *) { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+/* Aurora: listas nativas de <select> não aceitam fundo translúcido (ficavam ilegíveis) → superfície sólida */
+[data-theme="aurora"] select.field { background-color: #0a2140; }
+[data-theme="aurora"] select option, [data-theme="aurora"] select optgroup { background-color: #0a2140; color: #f2fbfa; }

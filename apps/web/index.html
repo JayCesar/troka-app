@@ -10,7 +10,7 @@
       // Aplica o tema salvo antes de pintar a página (mesma chave de src/lib/tema.ts)
       try {
         var t = localStorage.getItem("troka.tema");
-        if (t === "branco" || t === "escuro") document.documentElement.dataset.theme = t;
+        if (t === "branco" || t === "escuro" || t === "aurora") document.documentElement.dataset.theme = t;
       } catch (e) {}
     </script>
     <link rel="icon" type="image/svg+xml" href="/troka-icone.svg" />
