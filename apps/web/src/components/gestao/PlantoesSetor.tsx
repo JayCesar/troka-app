@@ -14,6 +14,7 @@ import {
   type Plantao,
 } from "@/lib/api/plantoes";
 import { fmtDay, fmtTime } from "@/lib/format";
+import { Selecao } from "@/components/Selecao";
 
 type Visao = "lista" | "tabela";
 const CHAVE_VISAO = "troka.gestao.plantoes.visao";
@@ -269,11 +270,10 @@ function PlantaoForm({ plantao, onClose }: { plantao?: Plantao | undefined; onCl
     else criar.mutate(input, done);
   };
 
-  const opt = (e: { id: string; nome: string; categoria: string }) => (
-    <option key={e.id} value={e.id}>
-      {e.nome} ({e.categoria === "medico" ? "médico" : "enfermeiro"}){noSetor.has(e.id) ? ` · ${noSetor.get(e.id)} no setor` : ""}
-    </option>
-  );
+  const opt = (e: { id: string; nome: string; categoria: string }) => ({
+    value: e.id,
+    label: `${e.nome} (${e.categoria === "medico" ? "médico" : "enfermeiro"})${noSetor.has(e.id) ? ` · ${noSetor.get(e.id)} no setor` : ""}`,
+  });
 
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-marca/60 sm:items-center">
@@ -283,13 +283,11 @@ function PlantaoForm({ plantao, onClose }: { plantao?: Plantao | undefined; onCl
           <button type="button" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
 
-        <label className="block space-y-1 text-sm font-semibold">1. Especialidade exigida
-          <select className="field" value={especialidadeId} onChange={(e) => { setEspecialidadeId(e.target.value); setProfissionalId(""); }}>
-            <option value="">Selecione…</option>
-            {doSetor.length > 0 && <optgroup label="Do seu setor">{doSetor.map(opt)}</optgroup>}
-            {outras.length > 0 && <optgroup label="Outras">{outras.map(opt)}</optgroup>}
-          </select>
-        </label>
+        <div className="space-y-1 text-sm font-semibold">
+          <label htmlFor="plantao-esp" className="block">1. Especialidade exigida</label>
+          <Selecao id="plantao-esp" value={especialidadeId} onChange={(v) => { setEspecialidadeId(v); setProfissionalId(""); }} vazio="Selecione…"
+            grupos={[{ label: "Do seu setor", opcoes: doSetor.map(opt) }, { label: "Outras", opcoes: outras.map(opt) }]} />
+        </div>
 
         <div className="space-y-2">
           <label className="block space-y-1 text-sm font-semibold">2. Data
@@ -313,15 +311,14 @@ function PlantaoForm({ plantao, onClose }: { plantao?: Plantao | undefined; onCl
           {iv && <p className="text-sm text-muted-foreground">{fmtResumo(iv.inicio)} → {fmtResumo(iv.fim)} ({horas}h)</p>}
         </div>
 
-        <label className="block space-y-1 text-sm font-semibold">3. Profissional (opcional)
-          <select className="field" value={profissionalId} disabled={!especialidadeId || elegiveis.length === 0} onChange={(e) => setProfissionalId(e.target.value)}>
-            <option value="">Deixar em aberto</option>
-            {elegiveis.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
-          </select>
+        <div className="space-y-1 text-sm font-semibold">
+          <label htmlFor="plantao-prof" className="block">3. Profissional (opcional)</label>
+          <Selecao id="plantao-prof" value={profissionalId} disabled={!especialidadeId || elegiveis.length === 0} onChange={setProfissionalId}
+            vazio="Deixar em aberto" opcoes={elegiveis.map((p) => ({ value: p.id, label: p.nome }))} />
           {especialidadeId && elegiveis.length === 0 && (
             <span className="block text-xs font-normal text-muted-foreground">Ninguém do seu setor tem essa especialidade; o plantão fica em aberto.</span>
           )}
-        </label>
+        </div>
 
         {erro && <p className="rounded-lg bg-destructive/10 p-3 text-sm font-medium text-destructive">{erro}</p>}
         {faltando && <p className="text-xs text-muted-foreground">{faltando}</p>}

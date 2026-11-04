@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { anuncioAtivo, useMeusPlantoes } from "@/lib/api/plantoes";
 import { CATEGORIAS, previaExpiracao, URGENCIAS, useAnunciar, type MotivoCategoria, type Urgencia } from "@/lib/api/anuncios";
 import { fmtDateTime, fmtDay, fmtTime } from "@/lib/format";
+import { Selecao } from "@/components/Selecao";
 
 export const Route = createFileRoute("/anunciar")({
   validateSearch: (s: Record<string, unknown>): { plantao?: string } =>
@@ -67,16 +68,15 @@ function Page() {
 
   return (
     <form className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-8" onSubmit={submit}>
-      <div className="space-y-5">
-      <label className="block space-y-2">
-        <span className="text-sm font-semibold">1. Plantão que não poderá cumprir</span>
-        <select className="field" value={plantao.id} onChange={(e) => setPlantaoId(e.target.value)}>
-          {anunciaveis.map((p) => {
+      <div className="min-w-0 space-y-5">
+      <div className="space-y-2">
+        <label htmlFor="anunciar-plantao" className="block text-sm font-semibold">1. Plantão que não poderá cumprir</label>
+        <Selecao id="anunciar-plantao" value={plantao.id} onChange={setPlantaoId}
+          opcoes={anunciaveis.map((p) => {
             const i = new Date(p.inicio).getTime();
-            return <option key={p.id} value={p.id}>{fmtDay(i)} {fmtTime(i)}–{fmtTime(new Date(p.fim).getTime())} · {p.especialidade?.nome}</option>;
-          })}
-        </select>
-      </label>
+            return { value: p.id, label: `${fmtDay(i)} ${fmtTime(i)}–${fmtTime(new Date(p.fim).getTime())} · ${p.especialidade?.nome ?? ""}` };
+          })} />
+      </div>
 
       <div className="space-y-2">
         <span className="text-sm font-semibold">2. Urgência (obrigatória)</span>

@@ -201,3 +201,4 @@
     - O desfoque do cabeçalho foi para um `::before`, porque `backdrop-filter` no `header` virava containing block dos filhos `fixed` e o painel saía da tela no celular.
     - `<select>` e `<option>` com fundo sólido no Aurora, já que a lista nativa não aceita fundo translúcido.
     - Cabeçalho: o título da página deixou de ser link, porque clicar em "Anunciar plantão" levava ao Início. No lugar, um link visível "← Início" aparece fora do Início.
+  - `<select>` nativo trocado por `Selecao` (Radix Select) em anunciar, plantões do setor, cadastro do profissional e cadastro público. A lista nativa é desenhada pelo navegador: no desktop e no DevTools ela sai da tela e ignora o tema. A nova lista fica na viewport (`collisionPadding` 16) e o texto longo é truncado no campo, que antes alargava a página para 372px.

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { useEspecialidades } from "@/lib/api/plantoes";
 import { cadastrarProfissional, type Categoria, type NovoProfissional } from "@/lib/services/cadastroProfissional";
+import { Selecao } from "@/components/Selecao";
 
 const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
 
@@ -109,10 +110,8 @@ export function Formulario({ onClose, inicial, onCadastrado }: { onClose: () => 
           </fieldset>
 
           <Campo id="cad-esp" label="Especialidade">
-            <select id="cad-esp" className="field" value={f.especialidade_id} onChange={(e) => setF({ ...f, especialidade_id: e.target.value })}>
-              <option value="">Selecione…</option>
-              {daCategoria.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
-            </select>
+            <Selecao id="cad-esp" value={f.especialidade_id} onChange={(v) => setF({ ...f, especialidade_id: v })} vazio="Selecione…"
+              opcoes={daCategoria.map((e) => ({ value: e.id, label: e.nome }))} />
           </Campo>
 
           <div className="grid grid-cols-[1fr_6.5rem] gap-2">
@@ -120,9 +119,7 @@ export function Formulario({ onClose, inicial, onCadastrado }: { onClose: () => 
               <input id="cad-conselho" className="field" inputMode="numeric" value={f.conselho_numero} onChange={(e) => setF({ ...f, conselho_numero: e.target.value })} />
             </Campo>
             <Campo id="cad-uf" label="UF">
-              <select id="cad-uf" className="field" value={f.conselho_uf} onChange={(e) => setF({ ...f, conselho_uf: e.target.value })}>
-                {UFS.map((u) => <option key={u}>{u}</option>)}
-              </select>
+              <Selecao id="cad-uf" value={f.conselho_uf} onChange={(v) => setF({ ...f, conselho_uf: v })} opcoes={UFS.map((u) => ({ value: u, label: u }))} />
             </Campo>
           </div>
 

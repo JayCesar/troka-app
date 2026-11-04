@@ -6,6 +6,7 @@ import { LogoLink } from "@/components/AppShell";
 import { SeletorTema } from "@/components/SeletorTema";
 import { useAuth } from "@/lib/auth";
 import { solicitarAcesso, useHospitaisCadastro, type Funcao } from "@/lib/api/pedidos";
+import { Selecao } from "@/components/Selecao";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({ meta: [{ title: "TroKa — Cadastre-se" }] }),
@@ -97,19 +98,14 @@ function Cadastro() {
             </div>
             <div className="space-y-1.5">
               <label htmlFor="cad-hospital" className="text-sm font-semibold">Hospital</label>
-              <select id="cad-hospital" className={`${CAMPO} [&>option]:text-foreground`} value={f.hospital} disabled={hospitais.isLoading}
-                onChange={(e) => set("hospital", e.target.value)}>
-                <option value="">{hospitais.isLoading ? "Carregando…" : "Selecione…"}</option>
-                {hospitais.data?.map((h) => <option key={h.id} value={h.id}>{h.nome}</option>)}
-              </select>
+              <Selecao id="cad-hospital" className={CAMPO} value={f.hospital} disabled={hospitais.isLoading} onChange={(v) => set("hospital", v)}
+                vazio={hospitais.isLoading ? "Carregando…" : "Selecione…"} opcoes={hospitais.data?.map((h) => ({ value: h.id, label: h.nome })) ?? []} />
               {hospitais.error && <p className="text-xs text-navy-erro">Não foi possível carregar os hospitais. Tente recarregar a página.</p>}
             </div>
             <div className="space-y-1.5">
               <label htmlFor="cad-categoria" className="text-sm font-semibold">Função</label>
-              <select id="cad-categoria" className={`${CAMPO} [&>option]:text-foreground`} value={f.categoria}
-                onChange={(e) => set("categoria", e.target.value as Pedido["categoria"])}>
-                {(Object.keys(ROTULO) as Pedido["categoria"][]).map((k) => <option key={k} value={k}>{ROTULO[k]}</option>)}
-              </select>
+              <Selecao id="cad-categoria" className={CAMPO} value={f.categoria} onChange={(v) => set("categoria", v as Pedido["categoria"])}
+                opcoes={(Object.keys(ROTULO) as Pedido["categoria"][]).map((k) => ({ value: k, label: ROTULO[k] }))} />
             </div>
             {f.categoria !== "gestor" && (
               <div className="space-y-1.5">
