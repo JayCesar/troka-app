@@ -82,3 +82,10 @@ export const useDefinirConfianca = () =>
     const { error } = await supabase.rpc("definir_confianca", { p_profissional_id: id, p_confiavel: confiavel });
     if (error) throw new Error(error.message);
   });
+
+// M4: gestor corrige nome/especialidade (RPC editar_profissional; o banco valida setor, categoria e RN13)
+export const useEditarProfissional = () =>
+  useAcaoGestor(async ({ id, nome, especialidadeId }: { id: string; nome: string; especialidadeId: string }) => {
+    const { error } = await supabase.rpc("editar_profissional", { p_id: id, p_nome: nome, p_especialidade_id: especialidadeId });
+    if (error) throw new Error(error.message);
+  });

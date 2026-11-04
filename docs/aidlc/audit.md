@@ -215,3 +215,11 @@
   - O e-mail fica fora do texto do aviso. Reenvio pendente e e-mail já cadastrado não geram aviso: não há insert, e a M2 segue sem revelar quem tem conta.
   - pgTAP `m3_aviso_pedido.test.sql` (6 testes). Suíte 198/198. E2E local ok (tela /cadastro, depois o sininho da gestora).
   - Nuvem: `db push --remote` rodado pelo usuário.
+- **SMTP na nuvem**: o primeiro convite deu 504 (`/invite` com `context deadline exceeded` em 10s), porque a conexão com o Brevo na porta 587 travava. Resolvido trocando a porta no painel (Authentication → Emails → SMTP Settings). O cadastro de profissional pela nuvem foi validado ponta a ponta.
+- **M4: editar profissional** (2026-11-04). Pedido do usuário: corrigir um nome cadastrado errado.
+  - RPC `editar_profissional(p_id, p_nome, p_especialidade_id)`: só gestor, só profissional do próprio setor (RN03/RN30; fora dele responde "não encontrado"). Nome com 3 a 120 caracteres. A FK composta garante especialidade da categoria (RN01).
+  - **RN13:** a troca de especialidade é bloqueada com plantão futuro, candidatura pendente ou troca assumida em andamento. O nome pode ser corrigido sempre.
+  - Categoria e CRM/COREN ficam **fora**, porque exigiriam nova validação do conselho (RN01b, Edge Function). O histórico (B8) já registra a alteração pelo trigger de `perfil`.
+  - pgTAP `m4_editar_profissional.test.sql` (12 testes). Suíte 210/210.
+  - Front: botão Editar na Equipe e na ficha do profissional (calendário), modal com `Selecao`. E2E local ok: nome salvo e RN13 bloqueando com mensagem clara.
+  - Nuvem: `db push --remote` rodado pelo usuário (M3 e M4).

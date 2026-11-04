@@ -1,13 +1,16 @@
-import { ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
-import { useDefinirConfianca, useEquipe } from "@/lib/api/gestao";
+import { EditarProfissional } from "@/components/gestao/EditarProfissional";
+import { useDefinirConfianca, useEquipe, type MembroEquipe } from "@/lib/api/gestao";
 
 // RN19b: o gestor marca quem é da lista de confiança. Troca entre dois confiáveis e candidatura de confiável
 // são aprovadas automaticamente (RN19c, RN06c) — só para solicitações futuras.
 export function Equipe() {
   const { data, isLoading } = useEquipe();
   const definir = useDefinirConfianca();
+  const [editando, setEditando] = useState<MembroEquipe | null>(null);
   return (
     <section className="space-y-3">
       <div>
@@ -24,6 +27,10 @@ export function Equipe() {
               {m.conselho_validacao === "nao_verificado" && <span className="chip mt-1 bg-warning/15 text-warning">Conselho não verificado (modo teste)</span>}
               {m.conselho_validacao === "simulado" && <span className="chip mt-1 bg-secondary">Validação simulada</span>}
             </div>
+            <button type="button" onClick={() => setEditando(m)} aria-label={`Editar ${m.nome}`} title="Editar"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Pencil className="h-4 w-4" aria-hidden />
+            </button>
             <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
               <ShieldCheck className={`h-4 w-4 ${m.confiavel ? "text-success" : "text-muted-foreground"}`} />
               Confiança
@@ -38,6 +45,7 @@ export function Equipe() {
           </li>
         ))}
       </ul>
+      <EditarProfissional membro={editando} onClose={() => setEditando(null)} />
     </section>
   );
 }

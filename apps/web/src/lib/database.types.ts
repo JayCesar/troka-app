@@ -906,6 +906,29 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      editar_profissional: {
+        Args: { p_especialidade_id: string; p_id: string; p_nome: string };
+        Returns: {
+          categoria: Database["public"]["Enums"]["categoria_profissional"] | null;
+          conselho_numero: string | null;
+          conselho_uf: string | null;
+          conselho_validacao: Database["public"]["Enums"]["validacao_conselho"] | null;
+          conselho_validado_em: string | null;
+          criado_em: string;
+          especialidade_id: string | null;
+          hospital_id: string;
+          id: string;
+          nome: string;
+          papel: Database["public"]["Enums"]["papel"];
+          setor_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "perfil";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       equipe_do_setor: {
         Args: Record<PropertyKey, never>;
         Returns: {

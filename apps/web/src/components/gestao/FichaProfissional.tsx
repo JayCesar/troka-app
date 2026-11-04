@@ -1,6 +1,8 @@
-import { BadgeCheck, CalendarClock, Clock, ShieldAlert, Star } from "lucide-react";
+import { useState } from "react";
+import { BadgeCheck, CalendarClock, Clock, Pencil, ShieldAlert, Star } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EditarProfissional } from "@/components/gestao/EditarProfissional";
 import { useEquipe } from "@/lib/api/gestao";
 import { anuncioAtivo, type Plantao } from "@/lib/api/plantoes";
 import { fmtTime } from "@/lib/format";
@@ -20,7 +22,11 @@ export function FichaProfissional({ profissionalId, plantoes, onClose }: { profi
     .filter((p) => p.profissional_id === profissionalId && new Date(p.fim).getTime() > agora)
     .sort((a, b) => a.inicio.localeCompare(b.inicio));
   const horas = proximos.reduce((h, p) => h + (new Date(p.fim).getTime() - new Date(p.inicio).getTime()) / 3_600_000, 0);
+  const [editando, setEditando] = useState(false);
   const nome = membro?.nome ?? plantoes.find((p) => p.profissional_id === profissionalId)?.profissional?.nome ?? "Profissional";
+
+  // Editar abre por cima da ficha; ao fechar, volta para a ficha já atualizada (equipe é invalidada)
+  if (editando && membro) return <EditarProfissional membro={membro} onClose={() => setEditando(false)} />;
 
   return (
     <Dialog open={!!profissionalId} onOpenChange={(o) => !o && onClose()}>
@@ -47,6 +53,7 @@ export function FichaProfissional({ profissionalId, plantoes, onClose }: { profi
               </span>
             )}
             {membro.confiavel && <span className="chip bg-warning/10 text-warning"><Star className="h-3.5 w-3.5" />Confiável</span>}
+            <button type="button" onClick={() => setEditando(true)} className="chip ml-auto bg-secondary hover:bg-muted"><Pencil className="h-3.5 w-3.5" aria-hidden />Editar</button>
           </div>
         )}
 
