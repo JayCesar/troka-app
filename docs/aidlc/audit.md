@@ -202,3 +202,16 @@
     - `<select>` e `<option>` com fundo sólido no Aurora, já que a lista nativa não aceita fundo translúcido.
     - Cabeçalho: o título da página deixou de ser link, porque clicar em "Anunciar plantão" levava ao Início. No lugar, um link visível "← Início" aparece fora do Início.
   - `<select>` nativo trocado por `Selecao` (Radix Select) em anunciar, plantões do setor, cadastro do profissional e cadastro público. A lista nativa é desenhada pelo navegador: no desktop e no DevTools ela sai da tela e ignora o tema. A nova lista fica na viewport (`collisionPadding` 16) e o texto longo é truncado no campo, que antes alargava a página para 372px.
+
+## Subida para a nuvem (2026-11-03)
+- **Supabase** `troKa` (`vgstaycqpvoiafxqltfp`), sa-east-1 (São Paulo, pensando em LGPD e dados de saúde), plano Free, **sem** integração GitHub: migrations só por `db push` manual com `--dry-run` antes. 11/11 migrations aplicadas (`migration list --remote`). Seed local não sobe.
+- **Auth**: `[remotes.production]` no `config.toml` define `site_url` e redirect `/definir-senha` da Vercel. Mantém da nuvem `max_frequency` 1m, MFA TOTP ligado, pooler 15/200 e vector off. `enable_signup = false` (RN01: entrada só por convite ou pedido aprovado). `config push` aplicado e o diff ficou em 0.
+- **SMTP**: Brevo (`smtp-relay.brevo.com:587`), remetente `jaycesar.dev@proton.me`, configurado **só no painel**, então a chave não fica no repositório. Exigido pelo Supabase Free para templates próprios e para enviar a qualquer destinatário. **A chave SMTP expira em 04/11/2027.** Remetente freemail sem DKIM/DMARC pode cair no spam; o próximo passo é um domínio próprio autenticado.
+- **Front**: Vercel, projeto `troka-app` a partir de `JayCesar/troka-app` (privado, remote `meu`; `origin` continua sendo o do colega), branch de produção `develop`, root `apps/web`, install `npx -y npm@11 install` (bug `edgesOut` do npm 10.9). URL: https://troka-app-neon.vercel.app. Só `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. Integração Supabase↔Vercel recusada, porque injetaria a service_role.
+- **Dados iniciais**: `supabase/producao/primeiro-gestor.sql`, só dados e idempotente, testado localmente com rollback. Roda no SQL Editor depois de criar o usuário no Auth.
+- Pendente: secrets (`SITE_URL`, `CONSELHO_VALIDACAO=simulada`, RN01b) e `functions deploy cadastrar-profissional`, rodados pelo usuário porque o modo automático bloqueou a escrita na nuvem. Depois, smoke test.
+- **M3: aviso de novo pedido de acesso** (2026-11-03). Pedido do usuário: o gestor só via o pedido entrando em Gestão.
+  - Trigger `after insert` em `pedido_acesso` chama `app.avisar` para todos os gestores do hospital do pedido (RN30), com link para `/gestao/aprovacoes`.
+  - O e-mail fica fora do texto do aviso. Reenvio pendente e e-mail já cadastrado não geram aviso: não há insert, e a M2 segue sem revelar quem tem conta.
+  - pgTAP `m3_aviso_pedido.test.sql` (6 testes). Suíte 198/198. E2E local ok (tela /cadastro, depois o sininho da gestora).
+  - Nuvem: `db push --remote` rodado pelo usuário.
