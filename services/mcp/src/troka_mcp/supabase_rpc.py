@@ -1,12 +1,30 @@
 """Cliente fino do PostgREST. Não tem regra de negócio: o banco (RPC + RLS) decide tudo com o JWT do usuário."""
 
 import logging
+import re
 import time
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import httpx
 
 log = logging.getLogger("troka_mcp")
+
+FUSO = ZoneInfo("America/Sao_Paulo")
+_TIMESTAMPTZ = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$")
+
+
+def para_local(v: Any) -> Any:
+    """Converte todo timestamptz da resposta (o banco devolve UTC) para o fuso de Brasília.
+    Modelos erram a conversão de cabeça ("plantão das 10h" em vez de 07h); aqui é determinístico."""
+    if isinstance(v, str) and _TIMESTAMPTZ.match(v):
+        return datetime.fromisoformat(v).astimezone(FUSO).isoformat()
+    if isinstance(v, list):
+        return [para_local(x) for x in v]
+    if isinstance(v, dict):
+        return {k: para_local(x) for k, x in v.items()}
+    return v
 
 
 class ErroTroka(Exception):
@@ -44,7 +62,7 @@ class SupabaseRPC:
 
         if r.status_code < 400:
             log.info("supabase_ok alvo=%s status=%s ms=%s", alvo, r.status_code, ms)
-            return r.json() if r.content else None
+            return para_local(r.json()) if r.content else None
 
         corpo = _json_ou_vazio(r)
         codigo = corpo.get("code")

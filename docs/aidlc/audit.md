@@ -251,3 +251,39 @@
     - HTTP com e sem token e com token inválido;
     - nenhum token no log.
   - Próximo: OAuth 2.1 para clientes externos, tool de cadastro e B11 como cliente do MCP.
+- **I5: chat do app com troca automática de modelo** (2026-11-04). Pedido do usuário: "quando um modelo não der certo, puxo outro".
+  - O `POST /chat` fica no próprio `services/mcp`: o loop modelo ↔ tools chama as 30 tools no mesmo processo, então há um catálogo só.
+  - Histórico em formato **neutro**, mantido stateless pelo front. Adaptadores:
+    - `anthropic` (SDK oficial);
+    - `openai_compat` (OpenRouter, Ollama e outros);
+    - o conteúdo nativo do Claude (thinking) volta intacto quando o próximo modelo também é o Claude.
+  - Roteador com cadeia `LLM_CADEIA`:
+    - **troca** com timeout, rede, 401, 402, 403, 404, 408, 409, 429, 5xx e 529;
+    - **não troca** com 400, 413 e 422 (bug nosso);
+    - circuit breaker: 3 falhas tiram o modelo por 60 s.
+  - Recusa de segurança: tratada pelo fallback **da própria Anthropic** (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`). **Nunca** é repassada a outro provedor, porque isso seria contornar a política.
+  - Modelo padrão: `claude-opus-5-5`, com effort `medium`.
+  - **Escrita pausa sempre**, qualquer que seja o modelo: o front mostra um cartão Confirmar/Cancelar. Uma mensagem nova cancela a ação pendente. Reenviar a mesma aprovação esbarra na RN do banco (testado: RN08).
+  - O JWT é validado (`meu_perfil`) antes de chamar o modelo, para um token falso não gastar créditos.
+  - Front: `conversar()` em `lib/services/assistente.ts`, `VITE_ASSISTENTE_URL` (URL pública, sem segredo) e o modelo que respondeu aparece no rodapé da mensagem.
+  - Verificado:
+    - pytest 36/36 (roteador, adaptadores e loop);
+    - E2E local via HTTP com o Supabase real e um modelo roteirizado: Claude 529 → próximo assume, circuito abre na 3ª falha, anúncio criado só após a aprovação;
+    - pgTAP 227/227 após `db reset`;
+    - front: `tsc`, vitest 10/10 e build.
+  - **Não testado** com modelos reais (o usuário ainda não tem chaves) nem a tela do chat no navegador.
+- **I5: ajustes depois do primeiro uso real** (2026-11-04).
+  - `max_tokens` explícito (`LLM_MAX_TOKENS`, padrão 2048) no formato OpenAI. Sem ele, o OpenRouter reservava o máximo do modelo (16.384) e devolvia 402 com saldo baixo.
+  - Quando todos os modelos falham com 402, o chat diz "sem crédito no provedor".
+  - **Fuso:** o banco devolve timestamptz em UTC, e um modelo grátis disse "10h às 22h" para um plantão das 07h às 19h. O `Prefer: timezone` do PostgREST não teve efeito, então o serviço converte todo timestamp da resposta para America/Sao_Paulo (`para_local`), o que vale também para clientes MCP externos. pytest 38/38.
+  - **Decisão do usuário:** modelos **grátis** do OpenRouter por enquanto, e Claude quando o projeto for profissional.
+    - Testados com a mesma pergunta, pelo `/chat` real:
+
+      | Modelo | Resultado |
+      |---|---|
+      | `nvidia/nemotron-3.5-super-vl:free` | Acertou leitura e escrita em ~15 s |
+      | `nemotron-3-ultra` | Timeout de 60 s |
+      | `gemma-4-31b-it:free` | 429 (limite do plano grátis) |
+
+    - Cadeia local: nemotron-super → nemotron-lightning → gemma.
+    - Risco aceito: prompts podem ser registrados pelo provedor grátis. Os dados de teste são fictícios; a troca para pago e privado vem antes de dado real sensível (LGPD).

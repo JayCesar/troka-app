@@ -14,13 +14,10 @@ URL = "http://supabase.test"
 pytestmark = pytest.mark.anyio
 
 
-@pytest.fixture
-def anyio_backend():
-    return "asyncio"
 
 
 def servidor(token: str | None = "jwt-do-usuario"):
-    return criar_servidor(SupabaseRPC(URL, "anon-key"), token_stdio=token)
+    return criar_servidor(SupabaseRPC(URL, "anon-key"), token_fixo=token)
 
 
 def payload(resultado) -> object:
@@ -94,3 +91,15 @@ async def test_leitura_e_escrita_marcadas():
     assert tools["anunciar"].annotations.read_only_hint is False
     assert tools["remover_plantao"].annotations.destructive_hint is True
     assert "resolver_pedido_acesso" not in tools  # aprovação exige o cadastro com convite (RN01b)
+
+
+@respx.mock
+async def test_horarios_saem_no_fuso_de_brasilia():
+    respx.post(f"{URL}/rest/v1/rpc/plantoes_periodo").mock(return_value=httpx.Response(200, json=[
+        {"id": "p1", "inicio": "2026-11-06T10:00:00+00:00", "fim": "2026-11-06T22:00:00.5+00:00", "status": "2026-11"}]))
+    async with Client(servidor()) as c:
+        r = await c.call_tool("plantoes_periodo", {})
+    p = payload(r)
+    assert p["inicio"] == "2026-11-06T07:00:00-03:00"
+    assert p["fim"] == "2026-11-06T19:00:00.500000-03:00"
+    assert p["status"] == "2026-11"  # string que não é timestamp fica intacta

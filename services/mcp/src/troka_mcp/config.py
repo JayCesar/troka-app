@@ -10,6 +10,7 @@ class Config:
     host: str
     port: int
     allowed_hosts: list[str]
+    cors_origins: list[str]
 
 
 def carregar() -> Config:
@@ -24,5 +25,11 @@ def carregar() -> Config:
         host=os.environ.get("MCP_HOST", "127.0.0.1"),
         port=int(os.environ.get("MCP_PORT", "8765")),
         # Proteção contra DNS rebinding: hosts aceitos no header Host (ex.: "mcp.troka.app,127.0.0.1:*")
-        allowed_hosts=[h.strip() for h in os.environ.get("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*").split(",") if h.strip()],
+        allowed_hosts=_lista("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*"),
+        # Origens do front que podem chamar /chat pelo navegador
+        cors_origins=_lista("CHAT_CORS_ORIGINS", "http://localhost:5173"),
     )
+
+
+def _lista(nome: str, padrao: str) -> list[str]:
+    return [x.strip() for x in os.environ.get(nome, padrao).split(",") if x.strip()]

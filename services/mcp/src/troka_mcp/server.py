@@ -33,7 +33,7 @@ TroKa: troca e cobertura de plantões hospitalares.
 """
 
 
-def _token(ctx: Context, token_stdio: str | None) -> str:
+def _token(ctx: Context, token_fixo: str | None) -> str:
     # O header não é prova de identidade aqui: só repassamos o JWT, e quem o valida é o Supabase.
     try:
         headers = ctx.headers or {}
@@ -42,17 +42,17 @@ def _token(ctx: Context, token_stdio: str | None) -> str:
     auth = headers.get("authorization", "")
     if auth.lower().startswith("bearer "):
         return auth[7:].strip()
-    if token_stdio:
-        return token_stdio
+    if token_fixo:
+        return token_fixo
     raise ToolError("Sem sessão: envie o access token do TroKa no header Authorization: Bearer <token>.")
 
 
-def criar_servidor(rpc: SupabaseRPC, token_stdio: str | None = None) -> MCPServer:
+def criar_servidor(rpc: SupabaseRPC, token_fixo: str | None = None) -> MCPServer:
     mcp = MCPServer(name="troka", title="TroKa", instructions=INSTRUCOES, version="0.1.0")
 
     async def chamar(ctx: Context, funcao: str, **params: Any) -> Any:
         try:
-            return await rpc.rpc(funcao, _token(ctx, token_stdio), params)
+            return await rpc.rpc(funcao, _token(ctx, token_fixo), params)
         except ErroTroka as e:
             raise ToolError(str(e)) from e
 
@@ -91,7 +91,7 @@ def criar_servidor(rpc: SupabaseRPC, token_stdio: str | None = None) -> MCPServe
     async def listar_especialidades(ctx: Context) -> Any:
         """Especialidades cadastradas (id, nome, categoria), para criar ou editar plantões."""
         try:
-            return await rpc.select("especialidade", _token(ctx, token_stdio),
+            return await rpc.select("especialidade", _token(ctx, token_fixo),
                                     {"select": "id,nome,categoria", "order": "categoria,nome"})
         except ErroTroka as e:
             raise ToolError(str(e)) from e
