@@ -22,6 +22,7 @@ import { SeletorFundoChat, useFundoChat } from "@/components/FundoChat";
 import { useGravacaoAudio } from "@/hooks/use-gravacao-audio";
 import {
   conversar,
+  despertarAssistente,
   transcreverAudio,
   type HistoricoIA,
   type MensagemChat,
@@ -64,6 +65,7 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
   const historicoIA = useRef<HistoricoIA>([]);
 
   useEffect(() => fimRef.current?.scrollIntoView({ block: "end" }), [mensagens, aberto]);
+  useEffect(despertarAssistente, []); // plano grátis do host dorme: acorda ao abrir o app
 
   const avisar = (t: string) =>
     setMensagens((m) => [...m, { id: novoId(), autor: "sistema", texto: t, em: Date.now() }]);

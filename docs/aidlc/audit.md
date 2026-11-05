@@ -287,3 +287,17 @@
 
     - Cadeia local: nemotron-super → nemotron-lightning → gemma.
     - Risco aceito: prompts podem ser registrados pelo provedor grátis. Os dados de teste são fictícios; a troca para pago e privado vem antes de dado real sensível (LGPD).
+- **I7: publicação do serviço do assistente, preparo** (2026-11-04).
+  - **Host escolhido: Render, plano grátis.**
+    - 512 MB, dorme após 15 min sem uso e leva ~1 min para voltar.
+    - 750 h/mês por workspace, o que basta para 1 serviço 24/7.
+    - O próprio Render diz que o plano grátis não é para produção. Ok para a fase de teste.
+  - **Koyeb descartado:** acorda mais rápido, mas o plano grátis passou a exigir cartão (pré-autorização) segundo fontes de 2026, e só tem região Frankfurt/Washington.
+  - `render.yaml` versionado na raiz, com segredos `sync: false`. A porta vem de `PORT`, o Dockerfile não fixa porta e o healthcheck usa a mesma variável.
+  - O front chama `/health` ao abrir o app (`despertarAssistente`) para esconder a partida a frio.
+  - Validado localmente: imagem Docker de 177 MB, usuário sem root, healthcheck `healthy` com `PORT=10000`.
+  - Pendências que dependem do usuário:
+    - `db push` do I2;
+    - push do commit;
+    - criar o Blueprint no Render e informar os segredos;
+    - `VITE_ASSISTENTE_URL` na Vercel.

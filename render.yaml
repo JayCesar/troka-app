@@ -1,0 +1,30 @@
+# Render Blueprint: serviço do assistente (services/mcp). Plano grátis: dorme após 15 min sem uso
+# e a primeira chamada depois disso leva ~1 min (o front faz um "despertar" ao abrir o app).
+# Segredos ficam com sync:false: o Render pede o valor no painel e eles nunca entram no repositório.
+services:
+  - type: web
+    name: troka-mcp
+    runtime: docker
+    plan: free
+    rootDir: services/mcp
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    branch: develop
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vgstaycqpvoiafxqltfp.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_CADEIA
+        value: openrouter:nvidia/nemotron-3.5-super-vl:free,openrouter:nvidia/nemotron-3.5-lightning:free,openrouter:google/gemma-4-31b-it:free
+      - key: LLM_MAX_TOKENS
+        value: "2048"
+      - key: CHAT_CORS_ORIGINS
+        value: https://troka-app-neon.vercel.app
+      - key: MCP_ALLOWED_HOSTS
+        value: troka-mcp.onrender.com

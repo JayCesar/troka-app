@@ -23,7 +23,8 @@ def carregar() -> Config:
         anon_key=anon,
         stdio_token=os.environ.get("TROKA_ACCESS_TOKEN") or None,
         host=os.environ.get("MCP_HOST", "127.0.0.1"),
-        port=int(os.environ.get("MCP_PORT", "8765")),
+        # PORT: injetada por hosts como Render/Koyeb; MCP_PORT tem precedência no local
+        port=int(os.environ.get("MCP_PORT") or os.environ.get("PORT") or "8765"),
         # Proteção contra DNS rebinding: hosts aceitos no header Host (ex.: "mcp.troka.app,127.0.0.1:*")
         allowed_hosts=_lista("MCP_ALLOWED_HOSTS", "127.0.0.1:*,localhost:*"),
         # Origens do front que podem chamar /chat pelo navegador

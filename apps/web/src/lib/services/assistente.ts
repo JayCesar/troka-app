@@ -84,3 +84,9 @@ export async function transcreverAudio(_audio: Blob): Promise<string> {
   // TODO(B11): integrar com o backend de transcrição.
   throw new AssistenteNaoConectadoError();
 }
+
+/** Acorda o serviço (o plano grátis do host dorme após 15 min parado e leva ~1 min para voltar).
+ *  Chamado ao abrir o app, para a primeira pergunta não pagar essa espera. Falha silenciosa. */
+export function despertarAssistente(): void {
+  if (URL_ASSISTENTE) void fetch(`${URL_ASSISTENTE}/health`).catch(() => {});
+}

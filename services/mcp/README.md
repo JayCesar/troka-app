@@ -54,10 +54,12 @@ Front: defina `VITE_ASSISTENTE_URL=http://127.0.0.1:8765` em `apps/web/.env.loca
 .venv/bin/pytest -q    # tools, roteador, adaptadores e loop do chat (sem rede nem chaves)
 ```
 
-## Deploy
-`Dockerfile` pronto para ECS/Fargate (porta 8765, `GET /health`, usuário sem root). Em produção:
-- `MCP_ALLOWED_HOSTS` deve ter o domínio do serviço.
-- Coloque um ALB com HTTPS na frente.
+## Deploy (Render, plano grátis)
+O `render.yaml` na raiz do repositório descreve o serviço: Docker, `rootDir: services/mcp`, deploy automático a partir de `develop`.
+- **Segredos** (`SUPABASE_ANON_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`) ficam com `sync: false`: o valor é informado no painel e nunca entra no repositório.
+- **Plano grátis:** o serviço dorme depois de 15 min sem uso e leva ~1 min para voltar. O front chama `/health` ao abrir o app para acordá-lo.
+- **Hosts:** se o nome `troka-mcp` estiver ocupado, a URL muda. Ajuste `MCP_ALLOWED_HOSTS`, e no front, `VITE_ASSISTENTE_URL`.
+- **Fora do Render:** o mesmo `Dockerfile` serve para Koyeb, Fly ou ECS. A porta vem de `MCP_PORT` ou `PORT`.
 
 ## Próximos passos
 - **OAuth 2.1** (Supabase como authorization server) para clientes externos (Claude.ai, Claude Desktop) obterem o token sem copiar e colar.
