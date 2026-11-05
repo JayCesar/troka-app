@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from .llm.roteador import Roteador, TodosFalharam
 from .llm.tipos import ChamadaTool, DefTool, Mensagem, ResultadoTool
 from .server import INSTRUCOES, criar_servidor
-from .supabase_rpc import ErroTroka, SupabaseRPC
+from .supabase_rpc import CODIGOS_SESSAO, ErroTroka, SupabaseRPC
 
 log = logging.getLogger("troka_mcp.chat")
 
@@ -47,6 +47,10 @@ class RespostaChat(BaseModel):
 
 
 class SessaoInvalida(Exception):
+    pass
+
+
+class ServicoIndisponivel(Exception):
     pass
 
 
@@ -84,7 +88,9 @@ class Assistente:
         try:
             linhas = await self._rpc.rpc("meu_perfil", token)
         except ErroTroka as e:
-            raise SessaoInvalida(str(e)) from e
+            if e.codigo in CODIGOS_SESSAO:
+                raise SessaoInvalida(str(e)) from e
+            raise ServicoIndisponivel(str(e)) from e  # ex.: banco sem a migration do I2
         if not linhas:
             raise SessaoInvalida("Perfil não encontrado.")
         sistema = _sistema(linhas[0])

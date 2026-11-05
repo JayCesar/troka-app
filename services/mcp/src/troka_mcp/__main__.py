@@ -10,7 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from .chat import Assistente, EntradaChat, SessaoInvalida
+from .chat import Assistente, EntradaChat, ServicoIndisponivel, SessaoInvalida
 from .config import carregar
 from .llm.cadeia import montar
 from .llm.roteador import Roteador
@@ -58,6 +58,8 @@ def main() -> None:
                 resp = await assistente.conversar(auth[7:].strip(), entrada)
             except SessaoInvalida as e:
                 return JSONResponse({"erro": str(e)}, 401)
+            except ServicoIndisponivel as e:
+                return JSONResponse({"erro": str(e)}, 503)
             return JSONResponse(resp.model_dump(mode="json", by_alias=True))
 
         app.add_route("/health", health, methods=["GET"])

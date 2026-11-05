@@ -27,6 +27,9 @@ def para_local(v: Any) -> Any:
     return v
 
 
+CODIGOS_SESSAO = {"401", "PGRST301", "PGRST302", "PGRST303"}
+
+
 class ErroTroka(Exception):
     """Erro já em linguagem de usuário (mensagem da RPC, ex.: 'RN13: ...')."""
 
@@ -67,8 +70,11 @@ class SupabaseRPC:
         corpo = _json_ou_vazio(r)
         codigo = corpo.get("code")
         log.warning("supabase_erro alvo=%s status=%s codigo=%s ms=%s", alvo, r.status_code, codigo, ms)
-        if r.status_code == 401 or codigo in ("PGRST301", "PGRST303"):
-            raise ErroTroka("Sessão expirada ou inválida: faça login de novo no TroKa.", codigo)
+        if r.status_code == 401 or codigo in CODIGOS_SESSAO:
+            raise ErroTroka("Sessão expirada ou inválida: faça login de novo no TroKa.", codigo or "401")
+        if codigo == "PGRST202":  # função não existe: migration não aplicada neste banco
+            log.error("supabase_funcao_ausente alvo=%s (migration pendente?)", alvo)
+            raise ErroTroka("O TroKa está sendo atualizado. Tente de novo em alguns minutos.", codigo)
         if codigo == "42501":
             raise ErroTroka("Seu perfil não tem permissão para esta ação.", codigo)
         raise ErroTroka(corpo.get("message") or "O TroKa recusou a operação.", codigo)

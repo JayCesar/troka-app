@@ -137,3 +137,12 @@ async def test_sem_credito_avisa_com_clareza():
     sem = Roteiro("openrouter:x", [FalhaProvedor("402 sem crédito", True, 402)])
     resp = await assistente(sem).conversar("jwt", EntradaChat(mensagem="oi"))
     assert resp.tipo == "erro" and "sem crédito" in resp.texto
+
+
+@respx.mock
+async def test_funcao_ausente_no_banco_nao_vira_sessao_expirada():
+    from troka_mcp.chat import ServicoIndisponivel
+    respx.post(f"{URL}/rest/v1/rpc/meu_perfil").mock(return_value=httpx.Response(
+        404, json={"code": "PGRST202", "message": "Could not find the function public.meu_perfil"}))
+    with pytest.raises(ServicoIndisponivel):
+        await assistente(Roteiro("a:1", [])).conversar("jwt", EntradaChat(mensagem="oi"))

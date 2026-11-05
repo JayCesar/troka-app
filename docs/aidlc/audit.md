@@ -301,3 +301,15 @@
     - push do commit;
     - criar o Blueprint no Render e informar os segredos;
     - `VITE_ASSISTENTE_URL` na Vercel.
+- **I7: primeiro uso na nuvem** (2026-11-04).
+  - **Chat dizia "sessão expirada".**
+    - Causa: a migration I2 (`meu_perfil`) não estava na nuvem. O CLI aplica no banco local por padrão e é preciso `db push --remote`.
+    - Além disso, o serviço tratava qualquer erro do `meu_perfil` como sessão inválida. Agora só 401/PGRST30x viram sessão inválida; `PGRST202` (função ausente) vira 503 "sendo atualizado", com o log `supabase_funcao_ausente`. pytest 39/39.
+    - Migration aplicada pelo usuário com `--remote`.
+  - **Site caía em "This page didn't load".**
+    - Causa confirmada em produção: `/assets/<arquivo inexistente>.js` respondia 200 com `text/html`, porque o rewrite da SPA pegava tudo. Uma aba aberta antes de um deploy importava um chunk que não existia mais e recebia HTML.
+    - Correções:
+      - o rewrite exclui `/assets/` (agora 404) e os assets têm cache `immutable`;
+      - o listener `vite:preloadError` e o error boundary recarregam a página uma vez (trava de 30 s em `sessionStorage`) quando o erro é de versão;
+      - a tela de erro passou para pt-BR e mostra a mensagem técnica quando o erro não é de versão.
+    - vitest 13/13 e build ok.
