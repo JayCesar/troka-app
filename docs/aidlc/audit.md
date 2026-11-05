@@ -233,3 +233,21 @@
   - O MCP é um adaptador fino: repassa o **JWT do usuário** para as RPCs, e as RN continuam no banco (RPC, RLS e constraints). Nunca usa service_role.
   - Tools de **leitura e escrita** desde a primeira versão. As de escrita exigem confirmação explícita do usuário antes de executar.
   - Inventário das chamadas em `docs/aidlc/mcp-inventario.md`. O chat do app (B11) vira cliente do mesmo MCP.
+- **I2: leituras para o MCP** (2026-11-04). Migration `20261104220000_i2_leituras_mcp.sql`.
+  - Novas RPCs: `meu_perfil`, `plantoes_periodo` (período de no máximo 93 dias), `anuncios_do_setor` e `buscar_profissional` (com `unaccent`).
+  - Todas são **security invoker**: a RLS existente aplica RN03/RN29/RN30, sem duplicar regra. RN29 já era garantida pela tabela `anuncio_motivo`, que tem RLS própria.
+  - pgTAP `i2_leituras_mcp.test.sql` (17 testes). Suíte 227/227.
+  - Nuvem: pendente, o `db push` fica com o usuário.
+- **I3: serviço MCP em Python** (2026-11-04). Fica em `services/mcp`, no mesmo repositório.
+  - **Mesmo repositório**: o contrato das tools acompanha as RPCs das migrations, e um único PR muda os dois. O deploy continua independente, com Dockerfile próprio.
+  - SDK `mcp` 2.x (`MCPServer`) + httpx direto no PostgREST, sem o supabase-py, que é uma dependência pesada e não necessária aqui.
+  - Dois modos: `stdio`, para dev, com o token do `.env`; e `http`, stateless, com o JWT em cada requisição, pronto para ECS. Tem `/health` e proteção contra DNS rebinding via `MCP_ALLOWED_HOSTS`.
+  - 30 tools: 11 de leitura e 19 de escrita, com anotações `readOnlyHint`/`destructiveHint` para o cliente pedir confirmação.
+  - `resolver_pedido_acesso` vira só `recusar_pedido_acesso`: aprovar pela RPC marcaria o pedido sem o cadastro com convite (RN01b).
+  - Observabilidade: um log por chamada (`alvo`, `status`, `codigo`, `ms`), sem token. O erro da RPC chega ao modelo como veio, citando a RN.
+  - Verificado:
+    - pytest 8/8;
+    - E2E local com gestora e médico (papéis corretos; TK403/RN05 e RN04 retornados);
+    - HTTP com e sem token e com token inválido;
+    - nenhum token no log.
+  - Próximo: OAuth 2.1 para clientes externos, tool de cadastro e B11 como cliente do MCP.

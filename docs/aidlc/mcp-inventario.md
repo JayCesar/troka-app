@@ -83,7 +83,18 @@ O MCP **não** faz login por conta própria: recebe o access token do usuário, 
 |---|---|---|
 | `cadastrar-profissional` | gestor | Envia o convite e valida o conselho (RN01b, secret `CONSELHO_VALIDACAO`). Pode virar tool chamando a função com o JWT do usuário |
 
-## Pendências para o MCP
-- Tools de leitura que hoje são `.from` precisam de RPCs com contrato estável, para o MCP não depender do schema das tabelas. Cada RPC nova ganha teste pgTAP.
-- Resolver nomes ("plantão de sexta da Ana") para uuid exige tools de busca (`buscar_profissional`, `buscar_plantao`).
+## RPCs criadas para o MCP (I2, migration `20261104220000_i2_leituras_mcp.sql`)
+Todas são `security invoker`: a RLS existente filtra (RN03, RN29, RN30). Testes em `supabase/tests/i2_leituras_mcp.test.sql` (17).
+
+| RPC | Parâmetros | Papel | Substitui |
+|---|---|---|---|
+| `meu_perfil` | — | todos | `.from("perfil")` do `auth.tsx` |
+| `plantoes_periodo` | `p_de?, p_ate? (≤ 93 dias), p_somente_meus?, p_profissional_id?` | todos | `useMeusPlantoes`, `usePlantoesSetor` |
+| `anuncios_do_setor` | — | todos (motivo só para o gestor e o anunciante) | `useAnunciosSetor` |
+| `buscar_profissional` | `p_termo` (≥ 2 letras, sem acento) | todos | busca por nome → uuid |
+
+## Fora do MCP por enquanto
+- `hospitais_para_cadastro` e `solicitar_acesso`: são fluxos de quem não está logado (anon).
+- Aprovar pedido de acesso: depende do cadastro com convite (Edge Function, RN01b). No MCP só existe a recusa.
+- `cadastrar-profissional`: fica para depois, como tool que chama a Edge Function com o JWT do gestor.
 - O chat do app (B11: `enviarAoAssistente`, `transcreverAudio`) passa a ser cliente do mesmo MCP.
