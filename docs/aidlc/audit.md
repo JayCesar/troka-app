@@ -223,3 +223,13 @@
   - pgTAP `m4_editar_profissional.test.sql` (12 testes). Suíte 210/210.
   - Front: botão Editar na Equipe e na ficha do profissional (calendário), modal com `Selecao`. E2E local ok: nome salvo e RN13 bloqueando com mensagem clara.
   - Nuvem: `db push --remote` rodado pelo usuário (M3 e M4).
+- **P1: PWA** (2026-11-04). Pedido do usuário: tornar o site instalável.
+  - `vite-plugin-pwa` (generateSW). Manifest com `start_url /inicio`, standalone e ícones 192, 512 e maskable 512 gerados de `troka-icone.svg`.
+  - Cache só do shell estático. `*.supabase.co` fica em **NetworkOnly**: dado de plantão e token nunca vão para o cache. Offline fora do escopo, porque a escala depende de dado fresco.
+  - `registerType: prompt`: o toast "Atualizar" (`AvisoAtualizacao`) evita trocar a versão no meio de uma ação. `vercel.json` serve o `sw.js` com `no-cache`.
+  - No Vitest, o módulo virtual `virtual:pwa-register/react` tem um stub. `tsc`, vitest 10/10, lint e build ok.
+- **I1: IA via MCP, decisão de arquitetura** (2026-11-04).
+  - O MCP é um **serviço separado** do Supabase, pedido do usuário. Será implementado depois.
+  - O MCP é um adaptador fino: repassa o **JWT do usuário** para as RPCs, e as RN continuam no banco (RPC, RLS e constraints). Nunca usa service_role.
+  - Tools de **leitura e escrita** desde a primeira versão. As de escrita exigem confirmação explícita do usuário antes de executar.
+  - Inventário das chamadas em `docs/aidlc/mcp-inventario.md`. O chat do app (B11) vira cliente do mesmo MCP.

@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { AuthProvider } from "../lib/auth";
 import { Toaster } from "sonner";
+import { AvisoAtualizacao } from "../components/AvisoAtualizacao";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +83,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster position="top-center" richColors />
+        <AvisoAtualizacao />
       </AuthProvider>
     </QueryClientProvider>
   );
