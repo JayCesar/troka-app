@@ -313,3 +313,17 @@
       - o listener `vite:preloadError` e o error boundary recarregam a página uma vez (trava de 30 s em `sessionStorage`) quando o erro é de versão;
       - a tela de erro passou para pt-BR e mostra a mensagem técnica quando o erro não é de versão.
     - vitest 13/13 e build ok.
+- **M5: voz em modal e sugestões contextuais no Início** (2026-11-04). Pedido do usuário: no celular o texto ditado era cortado, e as sugestões deviam ser "sempre pertinentes".
+  - **`ModalVoz`** (gaveta no celular, modal no desktop):
+    - tocar no microfone do Início abre o modal já gravando, com o texto completo ao vivo (`aria-live`);
+    - ao parar, o texto fica editável (Gravar de novo / Enviar / Cancelar);
+    - cancelar descarta o que ainda chegar do reconhecedor.
+  - **Chat (opção b):** a faixa "Gravando" quebra o texto em até ~3 linhas, com rolagem, em vez de usar `truncate`.
+  - **Sugestões:** `gerarSugestoes` é uma função pura que gera candidatas com peso:
+    - **profissional:** plantão em até 72 h não anunciado, anúncio aberto, ofertas e urgentes;
+    - **gestor:** pendências com contagem, alertas e plantões em aberto;
+    - **para os dois:** dia da semana, hora, fim do mês e dúvidas de regra;
+    - sorteio com variação (jitter) para variar sem trazer o irrelevante para o topo.
+  - Os dados vêm dos hooks já usados nas outras seções (cache do React Query). Ganharam o parâmetro `enabled`, para o profissional não chamar RPCs de gestor.
+  - Testes: `sugestoes.test.ts` (7) e `modal-voz.test.tsx` (3). vitest 23/23, `tsc`, lint e build ok.
+  - **Não verificado no navegador real**, porque o microfone e o Web Speech não rodam no ambiente de teste.

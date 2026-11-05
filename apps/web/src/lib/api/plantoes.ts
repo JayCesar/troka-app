@@ -41,8 +41,9 @@ const keys = {
   setor: ["plantoes", "setor"] as const,
 };
 
-export function useMeusPlantoes(userId: string) {
+export function useMeusPlantoes(userId: string, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: keys.meus(userId),
     queryFn: async () =>
       unwrap(
@@ -57,8 +58,9 @@ export function useMeusPlantoes(userId: string) {
 }
 
 // RLS já restringe ao setor do usuário (RN03)
-export function usePlantoesSetor() {
+export function usePlantoesSetor(enabled = true) {
   return useQuery({
+    enabled,
     queryKey: keys.setor,
     queryFn: async () =>
       unwrap(await supabase.from("plantao").select(SELECT).gte("fim", new Date().toISOString()).order("inicio")) as Plantao[],

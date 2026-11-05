@@ -18,3 +18,6 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+// jsdom não implementa scrollIntoView (usado para acompanhar o fim do chat e da transcrição)
+Element.prototype.scrollIntoView = () => {};

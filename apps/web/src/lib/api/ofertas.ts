@@ -30,8 +30,8 @@ export interface Solicitacao {
 }
 
 // Ofertas do setor com os motivos de inelegibilidade calculados no banco (RN12–RN15)
-export function useOfertas() {
-  return useQuery({ queryKey: ["ofertas"], queryFn: async () => unwrap(await supabase.rpc("ofertas_para_mim")) as unknown as Oferta[] });
+export function useOfertas(enabled = true) {
+  return useQuery({ enabled, queryKey: ["ofertas"], queryFn: async () => unwrap(await supabase.rpc("ofertas_para_mim")) as unknown as Oferta[] });
 }
 
 export function useMinhasSolicitacoes() {

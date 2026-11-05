@@ -37,8 +37,9 @@ export interface Alerta {
   criado_em: string;
   plantao: { inicio: string; fim: string; especialidade: { nome: string } | null; profissional: { nome: string } | null } | null;
 }
-export function useAlertas() {
+export function useAlertas(enabled = true) {
   return useQuery({
+    enabled,
     queryKey: ["alertas"],
     queryFn: async () =>
       unwrap(
@@ -53,8 +54,8 @@ export function useAlertas() {
 export const useResolverAlerta = () =>
   useAcaoGestor(async (id: string) => unwrap(await supabase.rpc("resolver_alerta", { p_alerta_id: id })));
 
-export function usePendencias() {
-  return useQuery({ queryKey: ["pendencias"], queryFn: async () => unwrap(await supabase.rpc("pendencias_do_setor")) as unknown as Pendencia[] });
+export function usePendencias(enabled = true) {
+  return useQuery({ enabled, queryKey: ["pendencias"], queryFn: async () => unwrap(await supabase.rpc("pendencias_do_setor")) as unknown as Pendencia[] });
 }
 
 export function useEquipe() {
