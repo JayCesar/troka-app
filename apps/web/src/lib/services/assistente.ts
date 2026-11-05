@@ -1,6 +1,7 @@
 // Assistente de IA (B11/I5). O front só conversa com o serviço `services/mcp` (rota /chat), mandando o JWT
 // da sessão. Chaves de modelos (Anthropic, OpenRouter) ficam só no serviço; nunca aqui.
 import { supabase } from "@/lib/supabase";
+import type { ProgressoTranscricao } from "@/lib/transcricao";
 
 export type Autor = "usuario" | "assistente" | "sistema" | "confirmacao";
 
@@ -77,12 +78,16 @@ export async function conversar(p: {
 }
 
 /**
- * PONTO DE INTEGRAÇÃO — transcrição de áudio (fallback quando o navegador não transcreve sozinho).
- * Recebe o áudio gravado (webm/mp4) e devolve o texto. Implementar no backend; nunca chamar o provedor direto do front.
+ * Transcrição do áudio gravado quando o navegador não transcreve sozinho (ex.: Brave).
+ * Roda o Whisper no próprio aparelho: o áudio não sai do dispositivo e não há custo.
+ * Carregado sob demanda: quem usa Chrome/Safari (fala nativa) nunca baixa o modelo.
  */
-export async function transcreverAudio(_audio: Blob): Promise<string> {
-  // TODO(B11): integrar com o backend de transcrição.
-  throw new AssistenteNaoConectadoError();
+export async function transcreverAudio(
+  audio: Blob,
+  onProgresso?: (p: ProgressoTranscricao) => void,
+): Promise<string> {
+  const { transcreverLocal } = await import("@/lib/transcricao");
+  return transcreverLocal(audio, onProgresso);
 }
 
 /** Acorda o serviço (o plano grátis do host dorme após 15 min parado e leva ~1 min para voltar).

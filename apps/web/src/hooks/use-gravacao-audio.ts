@@ -11,8 +11,14 @@ export type ModoGravacao = "fala" | "arquivo" | "indisponivel";
 const LIMITE_SEGUNDOS = 120;
 
 // Tipagem mínima: SpeechRecognition ainda não está no lib.dom do TypeScript.
-interface ResultadoFala { isFinal: boolean; 0: { transcript: string } }
-interface EventoFala { resultIndex: number; results: ArrayLike<ResultadoFala> }
+interface ResultadoFala {
+  isFinal: boolean;
+  0: { transcript: string };
+}
+interface EventoFala {
+  resultIndex: number;
+  results: ArrayLike<ResultadoFala>;
+}
 interface Reconhecedor {
   lang: string;
   continuous: boolean;
@@ -31,8 +37,27 @@ function reconhecedorDoNavegador(): ConstrutorReconhecedor | null {
   return w["SpeechRecognition"] ?? w["webkitSpeechRecognition"] ?? null;
 }
 
+// Navegadores que expõem a API de fala mas não têm o serviço por trás (ex.: Brave, Chromium sem chaves do Google)
+// falham com "network" na hora. Lembramos na sessão e vamos direto para gravar + transcrever no aparelho.
+const CHAVE_FALA_QUEBRADA = "troka.fala-indisponivel";
+export function falaDoNavegadorQuebrada(): boolean {
+  try {
+    return sessionStorage.getItem(CHAVE_FALA_QUEBRADA) === "1";
+  } catch {
+    return false;
+  }
+}
+function marcarFalaQuebrada() {
+  try {
+    sessionStorage.setItem(CHAVE_FALA_QUEBRADA, "1");
+  } catch {
+    // storage bloqueado: só não lembra entre gravações
+  }
+}
+const ERROS_SERVICO_FALA = new Set(["network", "language-not-supported"]);
+
 export function detectarModo(): ModoGravacao {
-  if (reconhecedorDoNavegador()) return "fala";
+  if (reconhecedorDoNavegador() && !falaDoNavegadorQuebrada()) return "fala";
   if (typeof window !== "undefined" && "MediaRecorder" in window) return "arquivo";
   return "indisponivel";
 }
@@ -53,13 +78,14 @@ export function mensagemDeErro(codigo: string): string {
     case "inseguro":
       return "A gravação de áudio só funciona em conexão segura (HTTPS).";
     case "indisponivel":
-      return "Seu navegador não suporta gravação de áudio. Digite a mensagem ou use Chrome/Safari atualizados.";
+      return "Seu navegador não permite gravar áudio. Digite a mensagem ou use Chrome/Safari atualizados.";
     default:
       return "Não foi possível gravar o áudio. Tente de novo ou digite a mensagem.";
   }
 }
 
-export const fmtDuracao = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+export const fmtDuracao = (s: number) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 function mimeSuportado(): string | undefined {
   const opcoes = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
@@ -77,7 +103,8 @@ interface Opcoes {
 export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
   const [estado, setEstado] = useState<EstadoGravacao>("ocioso");
   const [segundos, setSegundos] = useState(0);
-  const [modo] = useState<ModoGravacao>(detectarModo);
+  const [modo, setModo] = useState<ModoGravacao>(detectarModo);
+  const iniciarArquivoRef = useRef<() => Promise<void>>(async () => {});
 
   const cb = useRef({ onTexto, onAudio, onErro });
   cb.current = { onTexto, onAudio, onErro };
@@ -135,6 +162,16 @@ export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
       };
       r.onerror = (e) => {
         if (e.error === "no-speech" || e.error === "aborted") return; // silêncio/cancelado: não é erro
+        if (ERROS_SERVICO_FALA.has(e.error) && !finalizado) {
+          // Serviço de fala do navegador indisponível: troca sozinho para gravar e transcrever no aparelho
+          marcarFalaQuebrada();
+          setModo("arquivo");
+          r.onend = null;
+          reconhecedor.current = null;
+          limpar();
+          void iniciarArquivoRef.current();
+          return;
+        }
         falhar(e.error);
       };
       r.onend = () => {
@@ -151,7 +188,8 @@ export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
   );
 
   const iniciarArquivo = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) return falhar(window.isSecureContext ? "indisponivel" : "inseguro");
+    if (!navigator.mediaDevices?.getUserMedia)
+      return falhar(window.isSecureContext ? "indisponivel" : "inseguro");
     try {
       stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
@@ -177,11 +215,12 @@ export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
     setEstado("gravando");
     iniciarTimer();
   }, [falhar, iniciarTimer, limpar]);
+  iniciarArquivoRef.current = iniciarArquivo;
 
   const iniciar = useCallback(() => {
     if (estado !== "ocioso") return;
     if (!window.isSecureContext) return falhar("inseguro");
-    const Fala = reconhecedorDoNavegador();
+    const Fala = falaDoNavegadorQuebrada() ? null : reconhecedorDoNavegador();
     if (Fala) {
       try {
         iniciarFala(Fala);
@@ -194,7 +233,10 @@ export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
     falhar("indisponivel");
   }, [estado, falhar, iniciarArquivo, iniciarFala]);
 
-  const alternar = useCallback(() => (estado === "gravando" ? parar() : iniciar()), [estado, iniciar, parar]);
+  const alternar = useCallback(
+    () => (estado === "gravando" ? parar() : iniciar()),
+    [estado, iniciar, parar],
+  );
 
   // Desmontou (fechou o chat, trocou de página): libera o microfone.
   useEffect(

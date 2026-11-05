@@ -6,6 +6,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/compone
 import { fmtDuracao, useGravacaoAudio } from "@/hooks/use-gravacao-audio";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { transcreverAudio } from "@/lib/services/assistente";
+import type { ProgressoTranscricao } from "@/lib/transcricao";
 
 interface Props {
   aberto: boolean;
@@ -19,6 +20,7 @@ export function ModalVoz({ aberto, onFechar, onEnviar }: Props) {
   const mobile = useIsMobile();
   const [texto, setTexto] = useState("");
   const [erro, setErro] = useState<string | null>(null);
+  const [progresso, setProgresso] = useState<ProgressoTranscricao | null>(null);
   const descartar = useRef(false); // fechou/cancelou: ignora o que ainda chegar do reconhecedor
   const iniciou = useRef(false); // evita iniciar duas vezes (StrictMode roda efeitos 2x no dev)
   const fimRef = useRef<HTMLDivElement>(null);
@@ -28,9 +30,11 @@ export function ModalVoz({ aberto, onFechar, onEnviar }: Props) {
     onAudio: async (audio) => {
       if (descartar.current) return;
       try {
-        setTexto(await transcreverAudio(audio));
+        setTexto(await transcreverAudio(audio, setProgresso));
       } catch (e) {
         setErro((e as Error).message);
+      } finally {
+        setProgresso(null);
       }
     },
     onErro: setErro,
@@ -107,11 +111,29 @@ export function ModalVoz({ aberto, onFechar, onEnviar }: Props) {
           aria-live="polite"
           className="max-h-[40vh] min-h-28 overflow-y-auto whitespace-pre-wrap break-words rounded-[var(--radius)] border bg-muted/40 p-3 text-base leading-relaxed"
         >
-          {texto || (
-            <span className="text-muted-foreground">
-              {voz.gravando ? "Pode falar…" : "Transcrevendo o áudio…"}
-            </span>
-          )}
+          {texto ||
+            (progresso?.fase === "baixando" ? (
+              <span className="block space-y-2 text-muted-foreground">
+                <span className="block">
+                  Preparando a transcrição no seu aparelho (só na primeira vez)…{" "}
+                  {progresso.percentual}%
+                </span>
+                <span className="block h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                  <span
+                    className="block h-full bg-primary transition-[width]"
+                    style={{ width: `${progresso.percentual}%` }}
+                  />
+                </span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                {!voz.gravando
+                  ? "Transcrevendo o áudio…"
+                  : voz.modo === "arquivo"
+                    ? "Pode falar… o texto aparece quando você tocar em parar."
+                    : "Pode falar…"}
+              </span>
+            ))}
           <div ref={fimRef} />
         </div>
       ) : (

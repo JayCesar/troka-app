@@ -327,3 +327,20 @@
   - Os dados vêm dos hooks já usados nas outras seções (cache do React Query). Ganharam o parâmetro `enabled`, para o profissional não chamar RPCs de gestor.
   - Testes: `sugestoes.test.ts` (7) e `modal-voz.test.tsx` (3). vitest 23/23, `tsc`, lint e build ok.
   - **Não verificado no navegador real**, porque o microfone e o Web Speech não rodam no ambiente de teste.
+- **M6: transcrição de voz no próprio aparelho** (2026-11-04). Pedido do usuário: no Brave, gravar dava "Sem conexão para transcrever o áudio".
+  - Causa: o Brave (e o Chromium sem as chaves do Google) expõe `webkitSpeechRecognition`, mas não tem o serviço por trás, e falha na hora com `network`. Não havia plano B, porque `transcreverAudio` não estava implementado.
+  - Opções avaliadas:
+
+    | Opção | Por que não |
+    |---|---|
+    | OpenRouter com áudio | O modelo grátis `nemotron-3-nano-omni:free` exige US$ 0,50 de saldo para áudio (testado: 402) |
+    | Groq Whisper | Mais uma conta, e o áudio sai do aparelho |
+
+  - **Escolhida a opção A**, Whisper no navegador: grátis, e o áudio não sai do aparelho, o que é bom para LGPD.
+    - `onnx-community/whisper-base` q8 (~76 MB, só na primeira vez, depois em cache) num Web Worker (transformers.js 3.8.1).
+    - O áudio do MediaRecorder é decodificado para mono 16 kHz.
+  - Troca automática: o erro `network` ou `language-not-supported` na fala do navegador passa para a gravação de arquivo sem mostrar erro, e a escolha fica lembrada na sessão (`sessionStorage`). Chrome e Safari continuam com a fala nativa, ao vivo e sem download.
+  - O modal mostra o progresso do download e depois "Transcrevendo…".
+  - O worker e o `.wasm` (21 MB) ficam fora do precache da PWA (`globIgnores`): o precache caiu de 2,2 MB para 1,3 MB, e o bundle principal não mudou (290 kB).
+  - Validado no Node com o mesmo modelo: 5 s de fala em 3,9 s. Com voz sintética (espeak) a qualidade foi ruim; com voz humana falta testar no navegador real.
+  - vitest 25/25 (+2 do fallback), `tsc` e build ok.

@@ -41,6 +41,8 @@ export default defineConfig({
       workbox: {
         // Só o shell estático vai para o cache. Supabase (dados, auth, functions) nunca é cacheado.
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Transcrição local (Whisper): só baixa quem precisar (navegador sem voz nativa, ex.: Brave)
+        globIgnores: ["**/whisper.worker-*.js", "**/*.wasm"],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
         runtimeCaching: [
