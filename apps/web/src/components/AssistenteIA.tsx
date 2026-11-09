@@ -64,8 +64,12 @@ export function AssistenteProvider({ children }: { children: ReactNode }) {
   // Histórico no formato do serviço (inclui chamadas de tools); a tela mostra só `mensagens`.
   const historicoIA = useRef<HistoricoIA>([]);
 
-  useEffect(() => fimRef.current?.scrollIntoView({ block: "end" }), [mensagens, aberto]);
-  useEffect(despertarAssistente, []); // plano grátis do host dorme: acorda ao abrir o app
+  useEffect(() => {
+    fimRef.current?.scrollIntoView({ block: "end" }); // bloco: no Chrome novo scrollIntoView devolve Promise, e o React a trataria como cleanup
+  }, [mensagens, aberto]);
+  useEffect(() => {
+    despertarAssistente();
+  }, []); // plano grátis do host dorme: acorda ao abrir o app
 
   const avisar = (t: string) =>
     setMensagens((m) => [...m, { id: novoId(), autor: "sistema", texto: t, em: Date.now() }]);

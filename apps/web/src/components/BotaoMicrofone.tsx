@@ -52,7 +52,9 @@ export function BotaoMicrofone({
 // (até ~3 linhas, depois rola e acompanha o fim), em vez de ser cortado no celular.
 export function IndicadorGravacao({ segundos, texto }: { segundos: number; texto?: string }) {
   const fimRef = useRef<HTMLSpanElement>(null);
-  useEffect(() => fimRef.current?.scrollIntoView({ block: "end" }), [texto]);
+  useEffect(() => {
+    fimRef.current?.scrollIntoView({ block: "end" }); // bloco: no Chrome novo scrollIntoView devolve Promise, e o React a trataria como cleanup
+  }, [texto]);
   return (
     <div
       role="status"

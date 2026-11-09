@@ -19,5 +19,6 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
-// jsdom não implementa scrollIntoView (usado para acompanhar o fim do chat e da transcrição)
-Element.prototype.scrollIntoView = () => {};
+// jsdom não implementa scrollIntoView. Devolve Promise como o Chrome novo: um useEffect que retorne
+// esse valor quebra o React no cleanup ("is not a function"), e os testes passam a pegar isso.
+Element.prototype.scrollIntoView = (() => Promise.resolve()) as unknown as Element["scrollIntoView"];
