@@ -142,3 +142,24 @@ def test_cadeia_pula_provedor_sem_chave():
         "OPENROUTER_API_KEY": "k",
     })]
     assert nomes == ["openrouter:a/b", "ollama:qwen"]
+
+
+@respx.mock
+async def test_openrouter_tool_call_sem_id_ou_malformada_nao_quebra():
+    respx.post(OR_URL).mock(return_value=httpx.Response(200, json={
+        "choices": [{"finish_reason": "tool_calls", "message": {"content": None, "tool_calls": [
+            {"type": "function", "function": {"name": "meu_perfil", "arguments": "{}"}},
+            {"type": "function"},
+            "lixo",
+        ]}}],
+    }))
+    r = await OpenAICompat("openrouter", "x/y", "https://openrouter.ai/api/v1", "k").gerar("s", HIST, TOOLS)
+    assert [(c.id, c.nome) for c in r.mensagem.chamadas] == [("call_0", "meu_perfil")]
+
+
+@respx.mock
+async def test_openrouter_corpo_que_nao_e_json_troca_de_modelo():
+    respx.post(OR_URL).mock(return_value=httpx.Response(200, text="<html>gateway</html>"))
+    with pytest.raises(FalhaProvedor) as e:
+        await OpenAICompat("openrouter", "x/y", "https://openrouter.ai/api/v1", "k").gerar("s", HIST, TOOLS)
+    assert e.value.pode_trocar

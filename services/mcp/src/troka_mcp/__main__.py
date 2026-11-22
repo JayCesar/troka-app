@@ -60,6 +60,10 @@ def main() -> None:
                 return JSONResponse({"erro": str(e)}, 401)
             except ServicoIndisponivel as e:
                 return JSONResponse({"erro": str(e)}, 503)
+            except Exception:
+                # Sem isto, o 500 padrão do Starlette sai sem CORS e o navegador mostra "falha de rede".
+                logging.getLogger("troka_mcp").exception("chat_erro_inesperado")
+                return JSONResponse({"erro": "O assistente teve um erro inesperado. Tente de novo."}, 500)
             return JSONResponse(resp.model_dump(mode="json", by_alias=True))
 
         app.add_route("/health", health, methods=["GET"])

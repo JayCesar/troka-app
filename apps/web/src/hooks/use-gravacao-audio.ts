@@ -213,6 +213,8 @@ export function useGravacaoAudio({ onTexto, onAudio, onErro }: Opcoes) {
     gravador.current = rec;
     rec.start();
     setEstado("gravando");
+    // Enquanto a pessoa fala, o modelo de transcrição local já carrega (era a maior parte da espera)
+    void import("@/lib/transcricao").then((m) => m.preCarregarTranscricao()).catch(() => {});
     iniciarTimer();
   }, [falhar, iniciarTimer, limpar]);
   iniciarArquivoRef.current = iniciarArquivo;

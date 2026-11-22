@@ -45,6 +45,7 @@ export class AssistenteNaoConectadoError extends Error {
 }
 
 const URL_ASSISTENTE = import.meta.env.VITE_ASSISTENTE_URL?.replace(/\/$/, "");
+const ERRO_REDE = "Não consegui falar com o assistente agora. Tente de novo em instantes.";
 
 /** Um passo da conversa: nova mensagem e/ou resposta à confirmação pendente (`aprovar`). */
 export async function conversar(p: {
@@ -57,17 +58,25 @@ export async function conversar(p: {
   const token = data.session?.access_token;
   if (!token) throw new Error("Sua sessão expirou. Entre de novo para usar o assistente.");
 
-  let r: Response;
-  try {
-    r = await fetch(`${URL_ASSISTENTE}/chat`, {
+  const enviar = () =>
+    fetch(`${URL_ASSISTENTE}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(p),
     });
+  let r: Response;
+  try {
+    r = await enviar();
   } catch {
-    throw new AssistenteNaoConectadoError(
-      "Não consegui falar com o assistente agora. Tente de novo em instantes.",
-    );
+    // Falha de rede (ex.: serviço gratuito acordando): tenta mais uma vez. Nunca repete uma
+    // confirmação de ação (`aprovar`), para não arriscar executar a mesma escrita duas vezes.
+    if (p.aprovar !== undefined) throw new AssistenteNaoConectadoError(ERRO_REDE);
+    await new Promise((ok) => setTimeout(ok, 2500));
+    try {
+      r = await enviar();
+    } catch {
+      throw new AssistenteNaoConectadoError(ERRO_REDE);
+    }
   }
   const corpo = await r.json().catch(() => ({}));
   if (r.status === 401)

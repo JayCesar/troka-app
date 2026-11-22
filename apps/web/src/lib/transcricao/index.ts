@@ -16,6 +16,11 @@ function obterWorker(): Worker {
   return worker;
 }
 
+/** Começa a baixar/compilar o modelo antes do áudio chegar (chamado quando a gravação começa). */
+export function preCarregarTranscricao(): void {
+  obterWorker().postMessage({ tipo: "carregar" });
+}
+
 /** Decodifica webm/mp4/ogg do MediaRecorder em Float32 mono 16 kHz (o navegador reamostra). */
 export async function decodificar(audio: Blob): Promise<Float32Array> {
   const Ctx =
@@ -63,7 +68,7 @@ export async function transcreverLocal(
       if (m.tipo === "progresso")
         return onProgresso?.({ fase: "baixando", percentual: percentual(m.carregado, m.total) });
       if (m.tipo === "pronto") return onProgresso?.({ fase: "transcrevendo" });
-      if (m.id !== id) return;
+      if (m.tipo === "carregado" || m.id !== id) return; // aviso do pré-carregamento ou resposta de outro pedido
       clearTimeout(tempo);
       w.removeEventListener("message", ouvir);
       if (m.tipo === "texto") resolve(m.texto);

@@ -54,13 +54,18 @@ class OpenAICompat:
         if r.status_code >= 400:
             raise FalhaProvedor(f"{r.status_code} {_erro(r)}", classificar_status(r.status_code), r.status_code)
 
-        dados = r.json()
-        if "error" in dados or not dados.get("choices"):  # OpenRouter às vezes responde 200 com erro do provedor de baixo
+        try:
+            dados = r.json()
+        except ValueError as e:  # corpo cortado ou HTML de gateway: o próximo modelo assume
+            raise FalhaProvedor("resposta não é JSON", True) from e
+        if not isinstance(dados, dict) or "error" in dados or not dados.get("choices"):  # OpenRouter às vezes responde 200 com erro do provedor de baixo
             raise FalhaProvedor(f"erro no corpo: {str(dados.get('error'))[:120]}", True)
-        escolha = dados["choices"][0]
+        escolha = dados["choices"][0] if isinstance(dados["choices"][0], dict) else {}
         msg = escolha.get("message") or {}
-        chamadas = [ChamadaTool(id=tc["id"], nome=tc["function"]["name"], args=_args(tc["function"].get("arguments")))
-                    for tc in msg.get("tool_calls") or []]
+        # Modelos grátis às vezes mandam tool_call sem id ou malformada: gera id e ignora o que não tem nome
+        chamadas = [ChamadaTool(id=tc.get("id") or f"call_{i}", nome=fn["name"], args=_args(fn.get("arguments")))
+                    for i, tc in enumerate(msg.get("tool_calls") or [])
+                    if isinstance(tc, dict) and isinstance(fn := tc.get("function"), dict) and fn.get("name")]
         recusada = escolha.get("finish_reason") == "content_filter"
         texto = (msg.get("content") or "").strip() or None
         if recusada:
